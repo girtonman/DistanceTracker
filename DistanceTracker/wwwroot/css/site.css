@@ -117,3 +117,21 @@ body {
 	background-color: white;
 	margin-bottom: 15px;
 }
+
+/* Avatar td entries */
+table tbody tr td.entry-avatar {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+table tbody tr td.entry-avatar img {
+	aspect-ratio: 1;
+	height: 40px;
+	margin-right: 5px;
+}
+
+table.small tbody tr td.entry-avatar img {
+	aspect-ratio: 1;
+	height: 35px;
+	margin-right: 5px;
+}
