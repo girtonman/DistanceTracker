@@ -26,8 +26,8 @@ namespace DistanceTracker.Controllers
 			var leDAL = new LeaderboardEntryDAL();
 			var lehDAL = new LeaderboardEntryHistoryDAL();
 			var leaderboardEntries = await leDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
-			var recentNewSightings = await leDAL.GetRecentFirstSightings(20, null, leaderboardID);
-			var recentImprovements = await lehDAL.GetRecentImprovements(20, null, leaderboardID);
+			var recentNewSightings = await leDAL.GetRecentFirstSightings(30, null, leaderboardID);
+			var recentImprovements = await lehDAL.GetRecentImprovements(30, null, leaderboardID);
 			var leaderboard = await lDAL.GetLeaderboard(leaderboardID);
 
 			var viewModel = new LeaderboardViewModel()
