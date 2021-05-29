@@ -6,14 +6,14 @@ namespace DistanceTracker
 	{
 		public static string TimeFromMs(ulong milliseconds)
 		{
-			var seconds = milliseconds / 1000;
-			var minutes = seconds / 60;
-			var hours = minutes / 60;
+			var seconds = milliseconds / 1000.0;
+			var minutes = seconds / 60.0;
+			var hours = minutes / 60.0;
 
 			var output = "";
-			output += hours == 0 ? "" : $"{hours.ToString("00")}:";
-			output += minutes == 0 ? "" : $"{(minutes%60).ToString("00")}:";
-			output += $"{((milliseconds / 1000.0) % 60).ToString("00.000")}s";
+			output += hours < 1 ? "" : $"{hours:00}:";
+			output += minutes < 1 ? "" : $"{(minutes % 60):00}:";
+			output += seconds > 10 ? $"{(seconds % 60):00.000}s" : $"{(seconds % 60):0.000}s";
 			return output;
 		}
 
