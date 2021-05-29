@@ -15,32 +15,31 @@ namespace DistanceTracker
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		public Startup(IConfiguration configuration, IWebHostEnvironment env)
 		{
 			Configuration = configuration;
+			Environment = env;
 		}
 
 		public IConfiguration Configuration { get; }
+		public IWebHostEnvironment Environment { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
 			Settings.ConnectionString = Configuration["ConnectionString"];
-			services.Configure<CookiePolicyOptions>(options =>
+			if (Environment.EnvironmentName == Environments.Development)
 			{
-				// This lambda determines whether user consent for non-essential cookies is needed for a given request.
-				options.CheckConsentNeeded = context => true;
-				options.MinimumSameSitePolicy = SameSiteMode.None;
-			});
-
+				services.AddControllersWithViews().AddRazorRuntimeCompilation();
+			}
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app)
 		{
-			if (env.EnvironmentName == Environments.Development)
+			if (Environment.EnvironmentName == Environments.Development)
 			{
 				app.UseDeveloperExceptionPage();
 			}
