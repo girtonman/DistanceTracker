@@ -42,7 +42,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null)
 		{
 			Connection.Open();
-			var sql = $"SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC FROM LeaderboardEntries le "
+			var sql = $"SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, p.SteamAvatar FROM LeaderboardEntries le "
 				+ "LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID "
 				+ "LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
@@ -80,6 +80,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = le.SteamID,
 					Name = reader.GetString(4),
+					SteamAvatar = reader.IsDBNull(6) ? null : reader.GetString(6),
 				};
 				leaderboardEntries.Add(le);
 			}
@@ -95,7 +96,8 @@ namespace DistanceTracker.DALs
 			var sql = @"
 				SELECT global_leaderboard.*,
 					ROUND(NoodlePoints / 990.0, 2) as PlayerRating,
-					p.Name
+					p.Name,
+					p.SteamAvatar
 				FROM(
 					SELECT
 						SteamID,
@@ -132,6 +134,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = reader.GetUInt64(0),
 					Name = reader.GetString(4),
+					SteamAvatar = reader.IsDBNull(5) ? null : reader.GetString(5),
 				};
 				globalLeaderboardEntries.Add(gle);
 			}
@@ -241,7 +244,8 @@ namespace DistanceTracker.DALs
 					le.LeaderboardID,
 					le.SteamID,
 					l.LevelName,
-					p.Name
+					p.Name,
+					p.SteamAvatar
 				FROM(
 					SELECT
 						*,
@@ -275,6 +279,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = reader.GetUInt64(4),
 					Name = reader.GetString(6),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
 				};
 
 				rankedEntries.Add(rle);
@@ -296,7 +301,8 @@ namespace DistanceTracker.DALs
 					le.SteamID,
 					p.Name,
 					le.Milliseconds,
-					le.FirstSeenTimeUTC
+					le.FirstSeenTimeUTC,
+					p.SteamAvatar
 				FROM(
 					SELECT
 						*,
@@ -326,6 +332,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = reader.GetUInt64(3),
 					Name = reader.GetString(4),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
 				};
 
 				rankedEntries.Add(rle);

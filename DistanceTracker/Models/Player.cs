@@ -5,5 +5,6 @@
 		public uint ID { get; set; }
 		public ulong SteamID { get; set; }
 		public string Name { get; set; }
+		public string SteamAvatar { get; set; }
 	}
 }

@@ -17,7 +17,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null)
 		{
 			Connection.Open();
-			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC FROM LeaderboardEntryHistory leh "
+			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC, p.SteamAvatar FROM LeaderboardEntryHistory leh "
 				+ "LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID "
 				+ "LEFT JOIN Players p on p.SteamID = leh.SteamID ";
 
@@ -58,6 +58,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = leh.SteamID,
 					Name = reader.GetString(3),
+					SteamAvatar = reader.IsDBNull(10) ? null : reader.GetString(10),
 				};
 				entries.Add(leh);
 			}
@@ -70,7 +71,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<LeaderboardEntryHistory>> GetPastDaysImprovements(ulong steamID)
 		{
 			Connection.Open();
-			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC FROM LeaderboardEntryHistory leh "
+			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC, p.SteamAvatar  FROM LeaderboardEntryHistory leh "
 				+ "LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID "
 				+ "LEFT JOIN Players p on p.SteamID = leh.SteamID "
 				+ $"WHERE leh.SteamID = {steamID} "
@@ -101,6 +102,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = leh.SteamID,
 					Name = reader.GetString(3),
+					SteamAvatar = reader.IsDBNull(10) ? null : reader.GetString(10),
 				};
 				entries.Add(leh);
 			}

@@ -16,7 +16,7 @@ namespace DistanceTracker.DALs
 		public async Task<Player> GetPlayer(ulong steamID)
 		{
 			Connection.Open();
-			var sql = $"SELECT ID, SteamID, Name FROM Players WHERE SteamID = {steamID}";
+			var sql = $"SELECT ID, SteamID, Name, SteamAvatar FROM Players WHERE SteamID = {steamID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -28,6 +28,7 @@ namespace DistanceTracker.DALs
 					ID = reader.GetUInt32(0),
 					SteamID = reader.GetUInt64(1),
 					Name = reader.GetString(2),
+					SteamAvatar = reader.IsDBNull(3) ? null : reader.GetString(3),
 				};
 			}
 			reader.Close();
@@ -39,7 +40,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<Player>> SearchByName(string name)
 		{
 			Connection.Open();
-			var sql = $"SELECT ID, SteamID, Name FROM Players WHERE `Name` LIKE '%{name}%'";
+			var sql = $"SELECT ID, SteamID, Name, SteamAvatar FROM Players WHERE `Name` LIKE '%{name}%'";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -51,12 +52,26 @@ namespace DistanceTracker.DALs
 					ID = reader.GetUInt32(0),
 					SteamID = reader.GetUInt64(1),
 					Name = reader.GetString(2),
+					SteamAvatar = reader.IsDBNull(3) ? null : reader.GetString(3),
 				});
 			}
 			reader.Close();
 			Connection.Close();
 
 			return players;
+		}
+
+		public async Task UpdateSteamAvatar(ulong steamID, string steamAvatar)
+		{
+			Connection.Open();
+
+			var sql = $"UPDATE Players SET SteamAvatar = @steamAvatar WHERE SteamID = {steamID}";
+
+			var command = new MySqlCommand(sql, Connection);
+			command.Parameters.AddWithValue("@steamAvatar", steamAvatar);
+			await command.ExecuteNonQueryAsync();
+
+			Connection.Close();
 		}
 	}
 }
