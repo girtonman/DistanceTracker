@@ -294,13 +294,15 @@ namespace DistanceTracker.DALs
 					le.NoodlePoints,
 					ROUND(NoodlePoints / 10.0, 2) as PlayerRating,
 					le.SteamID,
-					p.Name
+					p.Name,
+					le.Milliseconds,
+					le.FirstSeenTimeUTC
 				FROM(
 					SELECT
 						*,
 						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 					FROM(
-							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
+							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds ASC) as `Rank`, FirstSeenTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
 					) ranks
 				) le
 				LEFT JOIN Players p ON p.SteamID = le.SteamID
@@ -317,6 +319,8 @@ namespace DistanceTracker.DALs
 					Rank = reader.GetInt32(0),
 					NoodlePoints = reader.GetDouble(1),
 					PlayerRating = reader.GetDouble(2),
+					Milliseconds = reader.GetUInt64(5),
+					FirstSeenTimeUTC = reader.GetUInt64(6),
 				};
 				rle.Player = new Player()
 				{

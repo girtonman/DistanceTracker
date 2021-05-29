@@ -26,7 +26,10 @@ html {
 }
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+	-webkit-box-shadow: 5px 5px 8px 3px rgba(0,0,0,0.6);
+	box-shadow: 5px 5px 8px 3px rgba(0,0,0,0.6);
+
+	/*box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);*/
 }
 
 button.accept-policy {
@@ -42,8 +45,6 @@ html {
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
   background-color: #222;
   color: #c8c8c8;
 }
@@ -64,4 +65,55 @@ body {
 
 .table-condensed {
 	font-size: 10px;
+}
+
+/* Custom scroll bars */
+.custom-scrollbar::-webkit-scrollbar {
+	width: 10px; /* width */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: #f1f1f1; /* Track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: #888; /* Handle */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #555; /* Handle on hover */
+}
+
+.custom-scrollbar {
+	overflow-y: scroll;
+}
+
+/* Sticky table headers */
+.sticky-headers {
+	overflow: auto;
+}
+
+.sticky-headers thead {
+	background-color: #212529;
+}
+
+.sticky-headers thead th {
+	position: sticky;
+	top: 0px;
+	border-top: 0px;
+	background-color: #212529;
+}
+
+.stroke {
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+	color: white;
+	/*-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: black;*/
+}
+
+.divider {
+	border: 1px solid black;
+	height: 4px;
+	background-color: white;
+	margin-bottom: 15px;
 }
