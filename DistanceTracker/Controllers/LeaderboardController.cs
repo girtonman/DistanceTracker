@@ -46,7 +46,12 @@ namespace DistanceTracker.Controllers
 			var lDAL = new LeaderboardDAL();
 			var levels = await lDAL.GetLevels();
 
-			return View(levels);
+			var viewModel = new LevelsViewModel()
+			{
+				Levels = levels
+			};
+
+			return View(viewModel);
         }
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

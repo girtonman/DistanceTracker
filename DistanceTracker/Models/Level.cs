@@ -6,9 +6,10 @@ namespace DistanceTracker
 		public string LevelName { get; set; }
 		public string LeaderboardName { get; set; }
 		public bool IsOfficial { get; set; }
-		public uint SteamLeaderboardID { get; set; }
+		public ulong SteamLeaderboardID { get; set; }
 		public uint EntryCount { get; set; }
-		public uint NewestTimeUTC { get; set; }
-		public uint NewestImprovementUTC { get; set; }
+		public ulong NewestTimeUTC { get; set; }
+		public ulong NewestImprovementUTC { get; set; }
+		public ulong LatestUpdateUTC { get; set; }
 	}
 }

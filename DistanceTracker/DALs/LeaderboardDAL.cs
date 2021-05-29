@@ -126,10 +126,11 @@ namespace DistanceTracker.DALs
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
-					SteamLeaderboardID = reader.GetUInt32(4),
+					SteamLeaderboardID = reader.GetUInt64(4),
 					EntryCount = reader.GetUInt32(5),
-					NewestTimeUTC = reader.GetUInt32(6),
-					NewestImprovementUTC = reader.GetUInt32(7),
+					NewestTimeUTC = reader.GetUInt64(6),
+					NewestImprovementUTC = reader.GetUInt64(7),
+					LatestUpdateUTC = System.Math.Max(reader.GetUInt64(6), reader.GetUInt64(7)),
                 });
             }
 			reader.Close();
