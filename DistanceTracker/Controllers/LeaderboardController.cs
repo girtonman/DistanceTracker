@@ -41,6 +41,14 @@ namespace DistanceTracker.Controllers
 			return View(viewModel);
 		}
 
+		public async Task<IActionResult> Levels()
+        {
+			var lDAL = new LeaderboardDAL();
+			var levels = await lDAL.GetLevels();
+
+			return View(levels);
+        }
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

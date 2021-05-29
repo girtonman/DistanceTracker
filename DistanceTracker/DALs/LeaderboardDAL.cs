@@ -83,5 +83,59 @@ namespace DistanceTracker.DALs
 
 			return leaderboards;
 		}
+
+		public async Task<List<Level>> GetLevels()
+        {
+			Connection.Open();
+
+			var sql = @"SELECT
+			lb.*,
+			LeaderboardCounts.EntryCount,
+			RecentFirstSightings.NewestTimeUTC,
+			RecentImprovements.NewestImprovementUTC
+			FROM Leaderboards lb
+			LEFT JOIN (
+			    SELECT LeaderboardID, COUNT(*) AS EntryCount FROM LeaderboardEntries
+			    GROUP BY LeaderboardID
+			) LeaderboardCounts ON lb.ID = LeaderboardCounts.LeaderboardID
+			LEFT JOIN (
+			    SELECT 
+			    lbe.LeaderboardID,
+			    MAX(lbe.FirstSeenTimeUTC) AS NewestTimeUTC
+			    FROM LeaderboardEntries AS lbe
+			    GROUP BY lbe.LeaderboardID
+			) RecentFirstSightings ON lb.ID = RecentFirstSightings.LeaderboardID
+			LEFT JOIN (
+			    SELECT 
+			    lbeh.LeaderboardID,
+			    MAX(lbeh.UpdatedTimeUTC) AS NewestImprovementUTC
+			    FROM LeaderboardEntryHistory AS lbeh
+			    GROUP BY lbeh.LeaderboardID
+			) RecentImprovements ON lb.ID = RecentImprovements.LeaderboardID
+			";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var levels = new List<Level>();
+			while(reader.Read())
+            {
+				levels.Add(new Level()
+                {
+					ID = reader.GetUInt32(0),
+					LevelName = reader.GetString(1),
+					LeaderboardName = reader.GetString(2),
+					IsOfficial = reader.GetBoolean(3),
+					SteamLeaderboardID = reader.GetUInt32(4),
+					EntryCount = reader.GetUInt32(5),
+					NewestTimeUTC = reader.GetUInt32(6),
+					NewestImprovementUTC = reader.GetUInt32(7),
+                });
+            }
+			reader.Close();
+			Connection.Close();
+
+			return levels;
+        }
 	}
 }
