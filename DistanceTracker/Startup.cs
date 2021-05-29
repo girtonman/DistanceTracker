@@ -28,6 +28,7 @@ namespace DistanceTracker
 		public void ConfigureServices(IServiceCollection services)
 		{
 			Settings.ConnectionString = Configuration["ConnectionString"];
+			Settings.SteamAPIKey = Configuration["SteamAPIKey"];
 			if (Environment.EnvironmentName == Environments.Development)
 			{
 				services.AddControllersWithViews().AddRazorRuntimeCompilation();

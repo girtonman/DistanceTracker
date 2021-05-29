@@ -1,0 +1,14 @@
+﻿@using DistanceTracker.Models.Steam;
+@model SteamPlayer
+
+@{
+	ViewData["Title"] = "Steam API Test";
+}
+
+@Model.PersonName
+Avatar
+<img src="@Model.Avatar"/>
+Avatar Full
+<img src="@Model.AvatarFull"/>
+Avatar Medium
+<img src="@Model.AvatarMedium"/>
