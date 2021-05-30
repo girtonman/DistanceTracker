@@ -109,7 +109,7 @@
 				<table class="table table-striped table-dark sticky-headers custom-scrollbar">
 					<thead>
 						<tr>
-							<th class="text-left">Rank</th>
+							<th class="text-left" width="100">Rank</th>
 							<th class="text-left">Player</th>
 							<th>Points</th>
 							<th>Rating</th>
@@ -121,7 +121,13 @@
 						@foreach (var entry in Model.LeaderboardEntries)
 						{
 							<tr>
-								<td class="text-left">@entry.Rank</td>
+								<td class="text-left" width="90">
+									@* TODO use the appropriate medal based on time *@
+									<div class="medal-diamond medal-small">
+										<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+									</div>
+									@entry.Rank
+								</td>
 								<td class="text-left entry-avatar">
 									<img src="@await entry.Player.GetSteamAvatar()" />
 									<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
