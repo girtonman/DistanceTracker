@@ -1,4 +1,5 @@
 ﻿@using DistanceTracker.Models
+@using DistanceTracker.Utils;
 @model LeaderboardViewModel
 
 @{
@@ -6,6 +7,7 @@
 	var BestEntry = Model.LeaderboardEntries.First();
 	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank == 2);
 	var HeaderHeightPX = 400;
+	var medalTimes = OfficialMapMedalTimes.Maps[Model.Leaderboard.ID];
 }
 
 <style>
@@ -123,7 +125,7 @@
 							<tr>
 								<td class="text-left" width="90">
 									@* TODO use the appropriate medal based on time *@
-									<div class="medal-diamond medal-small">
+									<div class="@medalTimes.GetMedalCSS(entry.Milliseconds) medal-small">
 										<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 									</div>
 									@entry.Rank
