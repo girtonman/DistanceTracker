@@ -13,6 +13,10 @@ namespace DistanceTracker.Controllers
 		{
 			return View();
 		}
+		public async Task<IActionResult> Medals()
+		{
+			return View();
+		}
 
 		public async Task<IActionResult> SteamAPITest(ulong steamID)
 		{
