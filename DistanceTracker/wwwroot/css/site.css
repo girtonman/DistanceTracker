@@ -111,6 +111,10 @@ body {
 	-webkit-text-stroke-color: black;*/
 }
 
+.stroke:hover {
+	color: white;
+}
+
 .divider {
 	border: 1px solid black;
 	height: 4px;
@@ -259,4 +263,8 @@ table.small tbody tr td.entry-avatar img {
 	91% {
 		background-color: rgb(208,35,122);
 	}
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+	background-color: #212529;
 }
