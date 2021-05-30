@@ -1,11 +1,14 @@
 ﻿@using DistanceTracker.Models
+@using DistanceTracker.Utils;
 @model LeaderboardViewModel
 
 @{
 	ViewData["Title"] = "TODO: Make this the leaderboard name";
 	var BestEntry = Model.LeaderboardEntries.First();
-	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank == 2);
+	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank != 1);
 	var HeaderHeightPX = 400;
+	var TabHeightPX = 20;
+	var medalTimes = OfficialMapMedalTimes.Maps[Model.Leaderboard.ID];
 }
 
 <style>
@@ -15,7 +18,20 @@
 		background-size: cover;
 		overflow:hidden;
 	}
+
+	.level-medal-times {
+		background: #222;
+		margin: 20px;
+		padding: 10px;
+	}
 </style>
+
+<script>
+$('#pills-tab a').on('click', function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+</script>
 
 <div class="text-center" style="margin-left: 15px; margin-right: 15px;">
 	
@@ -25,7 +41,6 @@
 		</div>
 		<div class="col-3">
 			<h5 class="stroke">Leader</h5>
-			
 			<h2 class="stroke"><img src="@await BestEntry.Player.GetSteamAvatar("_medium")" /> @BestEntry.Player.Name</h2>
 		</div>
 		<div class="col-3">
@@ -43,11 +58,49 @@
 	</div>
 	<div class="divider"></div>
 	<div class="row">
-		<div class="col-6">
-			<div class="row">
-				<div class="col-6">
-					<h4 class="text-left stroke">Recent Improvements</h4>
-					<div class="custom-scrollbar box-shadow" style="height: calc(100vh - @(HeaderHeightPX)px);">
+		<div class="col-3 offset-1">
+			<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+				<li class="nav-item">
+					<a class="nav-link active stroke" id="pills-home-tab" data-toggle="pill" href="#pills-info" role="tab">Level Info</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link stroke" id="pills-profile-tab" data-toggle="pill" href="#pills-improvements" role="tab">Recent Improvements</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link stroke" id="pills-contact-tab" data-toggle="pill" href="#pills-sightings" role="tab">Recent First Sightings</a>
+				</li>
+			</ul>
+			<div class="tab-content" id="pills-tabContent">
+				<div class="tab-pane fade show active" id="pills-info" role="tabpanel">
+					<div class="row">
+						<div class="col-5 level-medal-times">
+							<div class="medal-diamond medal-medium" style="margin-bottom: 5px;">
+								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+							</div>
+							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.DiamondTime)</h2>
+						</div>
+						<div class="col-5 level-medal-times">
+							<div class="medal-gold medal-medium" style="margin-bottom: 5px;">
+								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+							</div>
+							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.GoldTime)</h2>
+						</div>
+						<div class="col-5 level-medal-times">
+							<div class="medal-silver medal-medium" style="margin-bottom: 5px;">
+								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+							</div>
+							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.SilverTime)</h2>
+						</div>
+						<div class="col-5 level-medal-times">
+							<div class="medal-bronze medal-medium" style="margin-bottom: 5px;">
+								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+							</div>
+							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.BronzeTime)</h2>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane fade" id="pills-improvements" role="tabpanel">
+					<div class="custom-scrollbar box-shadow" style="height: calc(100vh - @(HeaderHeightPX + TabHeightPX)px);">
 						<table class="table table-striped table-dark small sticky-headers custom-scrollbar" style="margin-bottom: 0px">
 							<thead>
 								<tr>
@@ -74,9 +127,8 @@
 						</table>
 					</div>
 				</div>
-				<div class="col-6">
-					<h4 class="text-left stroke">Recent First Sightings</h4>
-					<div class="custom-scrollbar box-shadow" style="height: calc(100vh - @(HeaderHeightPX)px);">
+				<div class="tab-pane fade" id="pills-sightings" role="tabpanel">
+					<div class="custom-scrollbar box-shadow" style="height: calc(100vh - @(HeaderHeightPX + TabHeightPX)px);">
 						<table class="table table-striped table-dark small sticky-headers custom-scrollbar" style="margin-bottom: 0px">
 							<thead>
 								<tr>
@@ -103,7 +155,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-6">
+		<div class="col-7">
 			<h4 class="text-left stroke">Level Leaderboard</h4>
 			<div class="custom-scrollbar box-shadow" style="height: calc(100vh - @(HeaderHeightPX)px);">
 				<table class="table table-striped table-dark sticky-headers custom-scrollbar">
@@ -123,7 +175,7 @@
 							<tr>
 								<td class="text-left" width="90">
 									@* TODO use the appropriate medal based on time *@
-									<div class="medal-diamond medal-small">
+									<div class="@medalTimes.GetMedalCSS(entry.Milliseconds) medal-small">
 										<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 									</div>
 									@entry.Rank
