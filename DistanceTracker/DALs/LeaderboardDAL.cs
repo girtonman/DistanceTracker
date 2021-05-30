@@ -85,7 +85,7 @@ namespace DistanceTracker.DALs
 		}
 
 		public async Task<List<Level>> GetLevels()
-        {
+		{
 			Connection.Open();
 
 			var sql = @"SELECT
@@ -95,22 +95,22 @@ namespace DistanceTracker.DALs
 			RecentImprovements.NewestImprovementUTC
 			FROM Leaderboards lb
 			LEFT JOIN (
-			    SELECT LeaderboardID, COUNT(*) AS EntryCount FROM LeaderboardEntries
-			    GROUP BY LeaderboardID
+				SELECT LeaderboardID, COUNT(*) AS EntryCount FROM LeaderboardEntries
+				GROUP BY LeaderboardID
 			) LeaderboardCounts ON lb.ID = LeaderboardCounts.LeaderboardID
 			LEFT JOIN (
-			    SELECT 
-			    lbe.LeaderboardID,
-			    MAX(lbe.FirstSeenTimeUTC) AS NewestTimeUTC
-			    FROM LeaderboardEntries AS lbe
-			    GROUP BY lbe.LeaderboardID
+				SELECT 
+				lbe.LeaderboardID,
+				MAX(lbe.FirstSeenTimeUTC) AS NewestTimeUTC
+				FROM LeaderboardEntries AS lbe
+				GROUP BY lbe.LeaderboardID
 			) RecentFirstSightings ON lb.ID = RecentFirstSightings.LeaderboardID
 			LEFT JOIN (
-			    SELECT 
-			    lbeh.LeaderboardID,
-			    MAX(lbeh.UpdatedTimeUTC) AS NewestImprovementUTC
-			    FROM LeaderboardEntryHistory AS lbeh
-			    GROUP BY lbeh.LeaderboardID
+				SELECT 
+				lbeh.LeaderboardID,
+				MAX(lbeh.UpdatedTimeUTC) AS NewestImprovementUTC
+				FROM LeaderboardEntryHistory AS lbeh
+				GROUP BY lbeh.LeaderboardID
 			) RecentImprovements ON lb.ID = RecentImprovements.LeaderboardID
 			";
 
@@ -119,9 +119,9 @@ namespace DistanceTracker.DALs
 
 			var levels = new List<Level>();
 			while(reader.Read())
-            {
+			{
 				levels.Add(new Level()
-                {
+				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
@@ -131,12 +131,12 @@ namespace DistanceTracker.DALs
 					NewestTimeUTC = reader.GetUInt64(6),
 					NewestImprovementUTC = reader.GetUInt64(7),
 					LatestUpdateUTC = System.Math.Max(reader.GetUInt64(6), reader.GetUInt64(7)),
-                });
-            }
+				});
+			}
 			reader.Close();
 			Connection.Close();
 
 			return levels;
-        }
+		}
 	}
 }
