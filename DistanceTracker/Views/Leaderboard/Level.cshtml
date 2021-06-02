@@ -3,7 +3,7 @@
 @model LeaderboardViewModel
 
 @{
-	ViewData["Title"] = "TODO: Make this the leaderboard name";
+	ViewData["Title"] = Model.Leaderboard.LevelName;
 	var BestEntry = Model.LeaderboardEntries.First();
 	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank != 1);
 	var HeaderHeightPX = 400;
