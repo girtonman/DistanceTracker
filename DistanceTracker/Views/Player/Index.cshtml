@@ -47,7 +47,7 @@
 						@if (entry != null)
 						{
 							<tr>
-								<td>@entry.Leaderboard.LevelName</td>
+								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Leaderboard.ID">@entry.Leaderboard.LevelName</a></td>
 								<td>@entry.Rank</td>
 								<td>@entry.NoodlePoints.ToString("0")</td>
 								<td>@entry.PlayerRating.ToString("0.00")</td>
@@ -74,7 +74,7 @@
 						@if (entry.Sighting != null)
 						{
 							<tr>
-								<td>@entry.Sighting.Leaderboard.LevelName</td>
+								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Sighting.Leaderboard.ID">@entry.Sighting.Leaderboard.LevelName</a></td>
 								<td>@*TODO*@</td>
 								<td>@Formatter.TimeFromMs(entry.Sighting.Milliseconds) <span class="text-success">New!</span></td>
 								<td>@Formatter.TimeAgoFromUnixTime(entry.TimeUTC)</td>
@@ -83,7 +83,7 @@
 						else
 						{
 							<tr>
-								<td>@entry.Improvement.Leaderboard.LevelName</td>
+								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Improvement.Leaderboard.ID">@entry.Improvement.Leaderboard.LevelName</a></td>
 								<td>@entry.Improvement.NewRank ( <i class="fas fa-arrow-up fa-sm text-success"></i> @(entry.Improvement.OldRank - entry.Improvement.NewRank) )</td>
 								<td>@Formatter.TimeFromMs(entry.Improvement.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.TimeFromMs(entry.Improvement.OldMilliseconds - entry.Improvement.NewMilliseconds) )</td>
 								<td>@Formatter.TimeAgoFromUnixTime(entry.TimeUTC)</td>

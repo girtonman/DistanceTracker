@@ -24,7 +24,7 @@
 					{
 						<tr>
 							<td><a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a></td>
-							<td>@entry.Leaderboard.LevelName</td>
+							<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.LeaderboardID">@entry.Leaderboard.LevelName</a></td>
 							<td>@entry.NewRank ( <i class="fas fa-arrow-up fa-sm text-success"></i> @(entry.OldRank - entry.NewRank) )</td>
 							<td>@Formatter.TimeFromMs(entry.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.TimeFromMs(entry.OldMilliseconds-entry.NewMilliseconds) )</td>
 							<td>@Formatter.TimeAgoFromUnixTime(entry.UpdatedTimeUTC)</td>
@@ -49,7 +49,7 @@
 					{
 						<tr>
 							<td><a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a></td>
-							<td>@entry.Leaderboard.LevelName</td>
+							<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.LeaderboardID">@entry.Leaderboard.LevelName</a></td>
 							<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
 							<td>@Formatter.TimeAgoFromUnixTime(entry.FirstSeenTimeUTC)</td>
 						</tr>
