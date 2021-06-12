@@ -13,7 +13,8 @@ namespace DistanceTracker
 			var output = "";
 			output += hours < 1 ? "" : $"{Math.Truncate(hours):0}:";
 			output += hours > 0 || minutes > 10 ? $"{Math.Truncate(minutes % 60.0):00}:" : minutes > 0 ? $"{(Math.Truncate(minutes % 60.0)):0}:" : "";
-			output += minutes > 0 || seconds > 10 ? $"{(Math.Truncate(seconds % 60)):00.000}s" : $"{(Math.Truncate(seconds % 60)):0.000}s";
+			output += minutes > 0 || seconds > 10 ? $"{(Math.Truncate(seconds % 60.0)):00}" : $"{(Math.Truncate(seconds % 60.0)):0}";
+			output += $".{(Math.Truncate(milliseconds % 1000.0)):000}s";
 			return output;
 		}
 
