@@ -12,7 +12,7 @@
 	<div class="row">
 		<div class="col">
 			<h5>Global Rank</h5>
-			<h2>@(Model.GlobalLeaderboardEntry.Rank)th</h2>
+			<h2>@(Formatter.GetOrdinal(Model.GlobalLeaderboardEntry.Rank))</h2>
 			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksRankImprovement</h6>
 		</div>
 		<div class="col">
