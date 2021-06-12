@@ -7,13 +7,20 @@ namespace DistanceTracker.Controllers
 {
 	public class HomeController : Controller
 	{
-		public async Task<IActionResult> Index()
+		public IActionResult Index()
+		{
+			return View();
+		}
+
+		public async Task<IActionResult> GlobalActivity()
 		{
 			var lehDAL = new LeaderboardEntryHistoryDAL();
 			var leDAL = new LeaderboardEntryDAL();
-			var viewModel = new HomepageViewModel();
-			viewModel.RecentImprovements = await lehDAL.GetRecentImprovements(100);
-			viewModel.RecentFirstSightings = await leDAL.GetRecentFirstSightings(100);
+			var viewModel = new HomepageViewModel
+			{
+				RecentImprovements = await lehDAL.GetRecentImprovements(100),
+				RecentFirstSightings = await leDAL.GetRecentFirstSightings(100)
+			};
 
 
 			return View(viewModel);
