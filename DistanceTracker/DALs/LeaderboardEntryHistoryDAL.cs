@@ -68,14 +68,27 @@ namespace DistanceTracker.DALs
 			return entries;
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetPastDaysImprovements(ulong steamID)
+		public async Task<List<LeaderboardEntryHistory>> GetPastWeeksImprovements(ulong steamID)
 		{
 			Connection.Open();
-			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC, p.SteamAvatar  FROM LeaderboardEntryHistory leh "
-				+ "LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID "
-				+ "LEFT JOIN Players p on p.SteamID = leh.SteamID "
-				+ $"WHERE leh.SteamID = {steamID} "
-				+ $"AND leh.UpdatedTimeUTC > {DateTimeOffset.UtcNow.AddDays(-7).ToUnixTimeMilliseconds()}";
+			var sql = @$"
+				SELECT 
+					leh.LeaderboardID,
+					l.LevelName,
+					leh.SteamID,
+					p.Name,
+					leh.FirstSeenTimeUTC,
+					OldMilliseconds,
+					NewMilliseconds,
+					OldRank,
+					NewRank,
+					UpdatedTimeUTC,
+					p.SteamAvatar
+				FROM LeaderboardEntryHistory leh 
+				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
+				LEFT JOIN Players p on p.SteamID = leh.SteamID 
+				WHERE leh.SteamID = {steamID} 
+					AND leh.UpdatedTimeUTC > {DateTimeOffset.UtcNow.AddDays(-7).ToUnixTimeMilliseconds()}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 

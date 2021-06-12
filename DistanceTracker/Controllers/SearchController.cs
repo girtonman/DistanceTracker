@@ -7,15 +7,15 @@ namespace DistanceTracker.Controllers
 {
 	public class SearchController : Controller
 	{
-		public async Task<IActionResult> Index(string search)
+		public async Task<IActionResult> Index(string q)
 		{
-			if(string.IsNullOrEmpty(search))
+			if(string.IsNullOrEmpty(q))
 			{
 				return View();
 			}
 
 			var dal = new PlayerDAL();
-			var players = await dal.SearchByName(search);
+			var players = await dal.SearchByName(q);
 
 			return View(players);
 		}
