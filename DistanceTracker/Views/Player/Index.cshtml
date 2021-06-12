@@ -13,17 +13,17 @@
 		<div class="col">
 			<h5>Global Rank</h5>
 			<h2>@(Model.GlobalLeaderboardEntry.Rank)th</h2>
-			<h6>Last 24h: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastDaysRankImprovement</h6>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksRankImprovement</h6>
 		</div>
 		<div class="col">
 			<h5>Points</h5>
 			<h2>@Model.GlobalLeaderboardEntry.NoodlePoints</h2>
-			<h6>Last 24h: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastDaysPointsImprovement</h6>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksPointsImprovement</h6>
 		</div>
 		<div class="col">
 			<h5>Rating</h5>
 			<h2>@Model.GlobalLeaderboardEntry.PlayerRating</h2>
-			<h6>Last 24h: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastDaysRatingImprovement.ToString("0.00")</h6>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksRatingImprovement.ToString("0.00")</h6>
 		</div>
 	</div>
 

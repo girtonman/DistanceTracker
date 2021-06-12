@@ -21,8 +21,8 @@ namespace DistanceTracker.Controllers
 			var globalRanking = await leDAL.GetGlobalRankingForPlayer(steamID);
 			var rankedLeaderboardEntries = await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID);
 
-			var lastDaysImprovements = await lehDAL.GetPastDaysImprovements(steamID);
-			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastDaysImprovements);
+			var lastWeeksImprovements = await lehDAL.GetPastWeeksImprovements(steamID);
+			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
 			var oldGlobalRank = await leDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
 
 			var recentActivity = new List<Activity>();
@@ -43,9 +43,9 @@ namespace DistanceTracker.Controllers
 			{
 				Player = player,
 				SteamProfilePicURL = null,
-				LastDaysPointsImprovement = pointsImprovement,
-				LastDaysRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
-				LastDaysRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS),
+				LastWeeksPointsImprovement = pointsImprovement,
+				LastWeeksRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
+				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS),
 				GlobalLeaderboardEntry = globalRanking,
 				RecentActivity = recentActivity,
 				RankedLeaderboardEntries = rankedLeaderboardEntries.OrderBy(x => x.Rank).ToList(),
