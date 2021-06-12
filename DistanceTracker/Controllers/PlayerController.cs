@@ -42,7 +42,6 @@ namespace DistanceTracker.Controllers
 			var viewModel = new PlayerViewModel()
 			{
 				Player = player,
-				SteamProfilePicURL = null,
 				LastWeeksPointsImprovement = pointsImprovement,
 				LastWeeksRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
 				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS),

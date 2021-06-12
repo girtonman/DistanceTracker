@@ -4,7 +4,6 @@ namespace DistanceTracker.Models
 {
 	public class PlayerViewModel
 	{
-		public string SteamProfilePicURL { get; set; }
 		public double LastWeeksPointsImprovement { get; set; }
 		public int LastWeeksRankImprovement { get; set; }
 		public double LastWeeksRatingImprovement { get; set; }
