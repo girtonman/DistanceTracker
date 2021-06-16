@@ -15,9 +15,13 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> Global()
 		{
 			var dal = new LeaderboardEntryDAL();
-			var globalLeaderboardEntries = await dal.GetGlobalLeaderboard();
+			var viewModel = new GlobalLeaderboardViewModel
+			{
+				LeaderboardEntries = await dal.GetGlobalLeaderboard(),
+				WinnersCircle = await dal.GetGlobalWinnersCircle()
+			};
 
-			return View(globalLeaderboardEntries);
+			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Level(uint leaderboardID)
