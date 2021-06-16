@@ -89,7 +89,12 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 
 			var sql = @"SELECT
-			lb.*,
+			lb.ID,
+			lb.LevelName,
+			lb.LeaderboardName,
+			lb.IsOfficial,
+			lb.SteamLeaderboardID,
+			lb.LevelSet,
 			LeaderboardCounts.EntryCount,
 			RecentFirstSightings.NewestTimeUTC,
 			RecentImprovements.NewestImprovementUTC
@@ -120,18 +125,25 @@ namespace DistanceTracker.DALs
 			var levels = new List<Level>();
 			while(reader.Read())
 			{
-				levels.Add(new Level()
+				var level = new Level()
 				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
 					SteamLeaderboardID = reader.GetUInt64(4),
-					EntryCount = reader.GetUInt32(5),
-					NewestTimeUTC = reader.GetUInt64(6),
-					NewestImprovementUTC = reader.GetUInt64(7),
-					LatestUpdateUTC = System.Math.Max(reader.GetUInt64(6), reader.GetUInt64(7)),
-				});
+					LevelSet = reader.IsDBNull(5) ? null : reader.GetString(5),
+					EntryCount = reader.IsDBNull(6) ? (uint?)null : reader.GetUInt32(6),
+					NewestTimeUTC = reader.IsDBNull(7) ? (ulong?)null : reader.GetUInt64(7),
+					NewestImprovementUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),
+				};
+				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ? 
+					(level.NewestTimeUTC.HasValue 
+						? System.Math.Max(level.NewestTimeUTC.Value, level.NewestImprovementUTC.Value) 
+						: level.NewestTimeUTC) 
+					: null;
+
+				levels.Add(level);
 			}
 			reader.Close();
 			Connection.Close();
