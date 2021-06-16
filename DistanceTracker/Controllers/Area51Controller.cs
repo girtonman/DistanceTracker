@@ -9,11 +9,11 @@ namespace DistanceTracker.Controllers
 {
 	public class Area51Controller : Controller
 	{
-		public async Task<IActionResult> Index()
+		public IActionResult Index()
 		{
 			return View();
 		}
-		public async Task<IActionResult> Medals()
+		public IActionResult Medals()
 		{
 			return View();
 		}
