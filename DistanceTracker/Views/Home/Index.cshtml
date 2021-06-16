@@ -1,12 +1,16 @@
-﻿@{
+﻿@using DistanceTracker.Models
+@model SiteStats
+
+@{
 	ViewData["Title"] = $"Home";
 }
 
 <div class="container">
 	<div class="row" style="margin-top:30vh">
 		<div class="col-6 offset-3 text-center">
-			<img src="~/images/logo.png" class="img-fluid" />
-			<form class="form" action="/search" method="get">
+			@*<img src="~/images/logo.png" class="img-fluid" />*@
+			<img src="~/images/holdboost_text.svg" class="mb-5"/>
+			<form class="form mb-4" action="/search" method="get">
 				<div class="form-group" style="width:100%">
 					<input type="text" class="form-control" name="q" placeholder="Enter player name">
 				</div>
