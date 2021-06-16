@@ -44,7 +44,7 @@ namespace DistanceTracker.Controllers
 				Player = player,
 				LastWeeksPointsImprovement = pointsImprovement,
 				LastWeeksRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
-				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS),
+				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS) * 100,
 				GlobalLeaderboardEntry = globalRanking,
 				RecentActivity = recentActivity,
 				RankedLeaderboardEntries = rankedLeaderboardEntries.OrderBy(x => x.Rank).ToList(),
