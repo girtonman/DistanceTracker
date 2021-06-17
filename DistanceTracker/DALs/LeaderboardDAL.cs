@@ -59,31 +59,6 @@ namespace DistanceTracker.DALs
 			return leaderboards;
 		}
 
-		public async Task<List<Leaderboard>> GetOfficialSprintLeaderboards()
-		{
-			Connection.Open();
-
-			var sql = "SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards WHERE IsOfficial = true";
-			var command = new MySqlCommand(sql, Connection);
-			var reader = await command.ExecuteReaderAsync();
-
-			var leaderboards = new List<Leaderboard>();
-			while (reader.Read())
-			{
-				leaderboards.Add(new Leaderboard()
-				{
-					ID = reader.GetUInt32(0),
-					LevelName = reader.GetString(1),
-					LeaderboardName = reader.GetString(2),
-					IsOfficial = reader.GetBoolean(3),
-				});
-			}
-			reader.Close();
-			Connection.Close();
-
-			return leaderboards;
-		}
-
 		public async Task<List<Level>> GetLevels()
 		{
 			Connection.Open();
