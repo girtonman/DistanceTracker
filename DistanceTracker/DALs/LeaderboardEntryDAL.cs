@@ -17,7 +17,7 @@ namespace DistanceTracker.DALs
 		public async Task<Dictionary<ulong, LeaderboardEntry>> GetLeaderboardEntries(int leaderboardID)
 		{
 			Connection.Open();
-			var sql = $"SELECT ID, LeaderboardID, Milliseconds, SteamID, FirstSeenTimeUTC FROM LeaderboardEntries WHERE LeaderBoardID = {leaderboardID}";
+			var sql = $"SELECT ID, LeaderboardID, Milliseconds, SteamID, FirstSeenTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -43,9 +43,10 @@ namespace DistanceTracker.DALs
 		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null)
 		{
 			Connection.Open();
-			var sql = $"SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, p.SteamAvatar FROM LeaderboardEntries le "
-				+ "LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID "
-				+ "LEFT JOIN Players p on p.SteamID = le.SteamID ";
+			var sql = @$"
+				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, p.SteamAvatar FROM LeaderboardEntries le 
+				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID 
+				LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
 			if (steamID.HasValue)
 			{
@@ -96,7 +97,7 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 			var sql = @"
 				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 990.0, 2) as PlayerRating,
+					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating,
 					p.Name,
 					p.SteamAvatar
 				FROM(
@@ -150,7 +151,7 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 			var sql = @"
 				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 990.0, 2) as PlayerRating
+					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating
 				FROM(
 					SELECT
 						SteamID,
@@ -193,7 +194,7 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 			var sql = @"
 				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 990.0, 2) as PlayerRating
+					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating
 				FROM(
 					SELECT
 						SteamID,
