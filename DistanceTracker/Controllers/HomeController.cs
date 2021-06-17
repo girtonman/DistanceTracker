@@ -7,9 +7,11 @@ namespace DistanceTracker.Controllers
 {
 	public class HomeController : Controller
 	{
-		public IActionResult Index()
+		public async Task<IActionResult> IndexAsync()
 		{
-			return View();
+			var dal = new GeneralDAL();
+			var siteStats = await dal.GetSiteStats();
+			return View(siteStats);
 		}
 
 		public async Task<IActionResult> GlobalActivity()

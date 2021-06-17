@@ -6,7 +6,7 @@ namespace DistanceTracker
 {
 	public class NoodlePointsUtil
 	{
-		public static readonly int NUM_OFFICIAL_SPRINTS = 99;
+		public static readonly int NUM_OFFICIAL_SPRINTS = 120;
 		public static readonly int MAX_POINTS_PER_MAP = 1000;
 		public static readonly int RANK_CUTOFF = 1000;
 

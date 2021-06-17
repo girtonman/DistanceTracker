@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using DistanceTracker.Models;
+using MySqlConnector;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -341,6 +342,51 @@ namespace DistanceTracker.DALs
 			Connection.Close();
 
 			return rankedEntries;
+		}
+
+		public async Task<List<WinnersCircleEntry>> GetGlobalWinnersCircle()
+		{
+			Connection.Open();
+			var sql = $@"
+				SELECT
+					p.Name,
+					COUNT(*) AS `Count`
+				FROM
+				(
+					SELECT 
+						l.ID AS LeaderboardID,
+						(
+		 					SELECT SteamID
+		 					FROM LeaderboardEntries
+		 					WHERE LeaderboardID = l.ID
+		 					ORDER BY Milliseconds ASC
+		 					LIMIT 1
+						) AS SteamID
+					FROM Leaderboards l
+				) fpe
+				LEFT JOIN Players p ON p.SteamID = fpe.SteamID
+				WHERE p.Name IS NOT NULL
+				GROUP BY p.Name
+				ORDER BY `Count` DESC";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var winnersCircle = new List<WinnersCircleEntry>();
+			while (reader.Read())
+			{
+				var entry = new WinnersCircleEntry()
+				{
+					Name = reader.GetString(0),
+					Count = reader.GetInt32(1),
+				};
+
+				winnersCircle.Add(entry);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return winnersCircle;
 		}
 	}
 }

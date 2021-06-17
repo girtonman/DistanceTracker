@@ -44,7 +44,7 @@ namespace DistanceTracker.Controllers
 				Player = player,
 				LastWeeksPointsImprovement = pointsImprovement,
 				LastWeeksRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
-				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS),
+				LastWeeksRatingImprovement = (double) pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS) * 100,
 				GlobalLeaderboardEntry = globalRanking,
 				RecentActivity = recentActivity,
 				RankedLeaderboardEntries = rankedLeaderboardEntries.OrderBy(x => x.Rank).ToList(),
@@ -53,37 +53,47 @@ namespace DistanceTracker.Controllers
 			return View(viewModel);
 		}
 
-		public async Task<IActionResult> Compare(ulong leftSteamID, ulong rightSteamID)
+		public async Task<IActionResult> Compare(string steamIDs)
 		{
+			if(string.IsNullOrWhiteSpace(steamIDs))
+			{
+				return View(null);
+			}
+
 			var leDAL = new LeaderboardEntryDAL();
 			var lDAL = new LeaderboardDAL();
 			var pDAL = new PlayerDAL();
-
 			var leaderboards = await lDAL.GetAllLeaderboards();
-			var leftEntries = await leDAL.GetRankedLeaderboardEntriesForPlayer(leftSteamID);
-			var rightEntries = await leDAL.GetRankedLeaderboardEntriesForPlayer(rightSteamID);
-			var leftPlayer = await pDAL.GetPlayer(leftSteamID);
-			var rightPlayer = await pDAL.GetPlayer(rightSteamID);
+
+			// Make sure the list of steam IDs is unique
+			var steamIDList = steamIDs.Split(",").Select(x => ulong.Parse(x)).ToList();
+			steamIDList = steamIDList.GroupBy(x => x).Select(x => x.First()).ToList();
+			var entriesList = new Dictionary<ulong, List<RankedLeaderboardEntry>>();
+			var players = new List<Player>();
+
+			foreach (var steamID in steamIDList)
+			{
+				entriesList.Add(steamID, await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID));
+				players.Add(await pDAL.GetPlayer(steamID));
+			}
 
 			var viewModel = new PlayerComparisonViewModel()
 			{
-				LeftPlayer = leftPlayer,
-				RightPlayer = rightPlayer,
 				Comparisons = new List<PlayerComparisonEntry>(),
+				Players = players,
+				SteamIDs = steamIDs,
 			};
-			foreach(var leaderboard in leaderboards)
+			foreach(var leaderboard in leaderboards.OrderBy(x => x.ID))
 			{
-				var leftEntry = leftEntries.FirstOrDefault(x => x.Leaderboard.ID == leaderboard.ID);
-				var rightEntry = rightEntries.FirstOrDefault(x => x.Leaderboard.ID == leaderboard.ID);
-				if(leftEntry != null || rightEntry != null)
+				var comparison = new PlayerComparisonEntry();
+				comparison.Leaderboard = leaderboard;
+				comparison.RankedEntries = new Dictionary<ulong, RankedLeaderboardEntry>();
+				foreach(var player in players)
 				{
-					viewModel.Comparisons.Add(new PlayerComparisonEntry()
-					{
-						Leaderboard = leaderboard,
-						LeftEntry = leftEntry,
-						RightEntry = rightEntry,
-					});
+					var entry = entriesList[player.SteamID].FirstOrDefault(x => x.Leaderboard.ID == leaderboard.ID);
+					comparison.RankedEntries.Add(player.SteamID, entry);
 				}
+				viewModel.Comparisons.Add(comparison);
 			}
 
 			return View(viewModel);
