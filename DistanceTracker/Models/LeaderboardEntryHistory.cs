@@ -8,6 +8,20 @@
 		public ulong FirstSeenTimeUTC { get; set; }
 		public ulong OldMilliseconds { get; set; }
 		public ulong NewMilliseconds { get; set; }
+		public string MillisecondsString
+		{
+			get
+			{
+				return Formatter.TimeFromMs(NewMilliseconds);
+			}
+		}
+		public string TimeImprovement
+		{
+			get
+			{
+				return Formatter.TimeFromMs(OldMilliseconds - NewMilliseconds);
+			}
+		}
 		public uint OldRank { get; set; }
 		public uint NewRank { get; set; }
 		public ulong UpdatedTimeUTC { get; set; }
