@@ -12,5 +12,12 @@ namespace DistanceTracker
 		public ulong? NewestTimeUTC { get; set; }
 		public ulong? NewestImprovementUTC { get; set; }
 		public ulong? LatestUpdateUTC { get; set; }
+		public string TimeAgoString
+		{
+			get
+			{
+				return LatestUpdateUTC.HasValue ? Formatter.TimeAgoFromUnixTime(LatestUpdateUTC.Value) : "";
+			}
+		}
 	}
 }

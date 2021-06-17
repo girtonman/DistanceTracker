@@ -7,11 +7,6 @@ namespace DistanceTracker.Controllers
 {
 	public class LeaderboardController : Controller
 	{
-		public IActionResult Index()
-		{
-			return View();
-		}
-
 		public async Task<IActionResult> Global()
 		{
 			var dal = new LeaderboardEntryDAL();
@@ -47,15 +42,15 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> Levels()
 		{
-			var lDAL = new LeaderboardDAL();
-			var levels = await lDAL.GetLevels();
+			return View();
+		}
 
-			var viewModel = new LevelsViewModel()
-			{
-				Levels = levels
-			};
+		public async Task<IActionResult> GetLevels()
+		{
+			var dal = new LeaderboardDAL();
+			var levels = await dal.GetLevels();
 
-			return View(viewModel);
+			return new JsonResult(levels);
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
