@@ -61,7 +61,6 @@
 		});
 
 		var winnersCircleData = @Html.Raw(JsonConvert.SerializeObject(Model.WinnersCircle));
-		console.log(winnersCircleData);
 
 		for (var i = 0; i < winnersCircleData.length; i++) {
 			var slice = winnersCircleData[i];

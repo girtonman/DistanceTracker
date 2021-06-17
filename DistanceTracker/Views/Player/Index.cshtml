@@ -1,30 +1,161 @@
 ﻿@using DistanceTracker.Models
-@model PlayerViewModel
+@model Player
 
 @{
-	ViewData["Title"] = $"Player: {Model.Player.Name}";
+	ViewData["Title"] = $"Player: {Model.Name}";
 }
 
-<div class="text-center">
-	<img src="@await Model.Player.GetSteamAvatar("_full")" />
-	<h1>@Model.Player.Name</h1>
+<script>
+	jQuery(function () {
+		getGlobalStats();
+		getLeaderboardRankings();
+		getRecentActivity();
+	});
+
+	function getGlobalStats() {
+		$.ajax({
+			url: '/Player/GetGlobalStats',
+			method: 'GET',
+			data: {
+				steamID: '@Model.SteamID'
+			},
+			success: function (data) {
+				$('#globalRankPlaceholder').hide();
+				$('#globalRank').show();
+				$('#globalRank').html(data.globalLeaderboardEntry.rank);
+
+				$('#globalPointsPlaceholder').hide();
+				$('#globalPoints').show();
+				$('#globalPoints').html(data.globalLeaderboardEntry.noodlePoints);
+
+				$('#globalRatingPlaceholder').hide();
+				$('#globalRating').show();
+				$('#globalRating').html(data.globalLeaderboardEntry.playerRating);
+
+				$('#globalRankImprovement').html(data.lastWeeksRankImprovement);
+				$('#globalPointsImprovement').html(data.lastWeeksPointsImprovement);
+				$('#globalRatingImprovement').html(data.lastWeeksRatingImprovement);
+			},
+			error: function () {
+				toastr.error('Failed to load global stats for this player');
+			}
+		});
+	};
+
+	function getLeaderboardRankings() {
+		$.ajax({
+			url: '/Player/GetLeaderboardRankings',
+			method: 'GET',
+			data: {
+				steamID: '@Model.SteamID'
+			},
+			success: async function (data) {
+				$('#leaderboardRankingsPlaceholder').hide();
+				var leaderboardRankings = $('#leaderboardRankings');
+				for (var i = 0; i < data.length; i++) {
+					var rankedEntry = data[i];
+					var row = $(`
+						<tr>
+							<td class="text-left"><div class="fade-in">
+								<a class="link" href="/Leaderboard/Level?leaderboardID=${rankedEntry.leaderboard.id}">
+									${rankedEntry.leaderboard.levelName}
+								</a>
+							</div></td>
+							<td><div class="fade-in">${rankedEntry.rank}</div></td>
+							<td><div class="fade-in">${rankedEntry.noodlePointsString}</div></td>
+							<td><div class="fade-in">${rankedEntry.playerRatingString}</div></td>
+						</tr>
+					`);
+					leaderboardRankings.append(row);
+					await new Promise(r => setTimeout(r, 15));
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load global stats for this player');
+			}
+		});
+	};
+
+	function getRecentActivity() {
+		$.ajax({
+			url: '/Player/GetRecentActivity',
+			method: 'GET',
+			data: {
+				steamID: '@Model.SteamID'
+			},
+			success: async function (data) {
+				$('#recentActivityPlaceholder').hide();
+				console.log(data)
+				var recentActivity = $('#recentActivity');
+				for (var i = 0; i < data.length; i++) {
+					var activity = data[i];
+					if (activity.sighting != null) {
+						var row = $(`
+							<tr>
+								<td class="text-left"><div class="fade-in">
+									<a class="link" href="/Leaderboard/Level?leaderboardID=${activity.sighting.leaderboard.id}">
+										${activity.sighting.leaderboard.levelName}
+									</a>
+								</div></td>
+								<td><div class="fade-in">${/*TODO*/''}</div></td>
+								<td><div class="fade-in">${activity.sighting.millisecondsString} <span class="text-success">New!</span></div></td>
+								<td><div class="fade-in">${activity.timeAgoString}</div></td>
+							</tr>
+						`);
+					}
+					else {
+						var row = $(`
+							<tr>
+								<td class="text-left"><div class="fade-in">
+									<a class="link" href="/Leaderboard/Level?leaderboardID=${activity.improvement.leaderboard.id}">
+										${activity.improvement.leaderboard.levelName}
+									</a>
+								</div></td>
+								<td><div class="fade-in">
+									${activity.improvement.newRank}
+									( <i class="fas fa-arrow-up fa-sm text-success"></i> ${activity.improvement.oldRank - activity.improvement.newRank} )</div></td>
+								<td><div class="fade-in">
+									${activity.improvement.millisecondsString}
+									( <i class="fas fa-arrow-up fa-sm text-success"></i> ${activity.improvement.timeImprovement} )</div></td>
+								<td><div class="fade-in">${activity.timeAgoString}</div></td>
+							</tr>
+						`);
+					}
+					recentActivity.append(row);
+					await new Promise(r => setTimeout(r, 15));
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load recent activity for this player');
+			}
+		});
+	};
+
+</script>
+
+<div class="text-center fade-in">
+	<img src="@await Model.GetSteamAvatar("_full")" />
+	<h1>@Model.Name</h1>
 	<hr />
 
 	<div class="row">
 		<div class="col">
 			<h5>Global Rank</h5>
-			<h2>@(Formatter.GetOrdinal(Model.GlobalLeaderboardEntry.Rank))</h2>
-			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksRankImprovement</h6>
+			<div id="globalRankPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+			<h2 id="globalRank" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h2>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRankImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 		</div>
 		<div class="col">
 			<h5>Points</h5>
-			<h2>@Model.GlobalLeaderboardEntry.NoodlePoints</h2>
-			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksPointsImprovement</h6>
+			<div id="globalPointsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+			<h2 id="globalPoints" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h2>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalPointsImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 		</div>
 		<div class="col">
 			<h5>Rating</h5>
-			<h2>@Model.GlobalLeaderboardEntry.PlayerRating</h2>
-			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> @Model.LastWeeksRatingImprovement.ToString("0.0000")</h6>
+			<div id="globalRatingPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+			<h2 id="globalRating" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h2>
+			<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRatingImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 		</div>
 	</div>
 
@@ -42,57 +173,26 @@
 						<th>Rating</th>
 					</tr>
 				</thead>
-				<tbody>
-					@foreach(var entry in Model.RankedLeaderboardEntries)
-					{
-						@if (entry != null)
-						{
-							<tr>
-								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Leaderboard.ID">@entry.Leaderboard.LevelName</a></td>
-								<td>@entry.Rank</td>
-								<td>@entry.NoodlePoints.ToString("0")</td>
-								<td>@entry.PlayerRating.ToString("0.00")</td>
-							</tr>
-						}
-					}
+				<tbody id="leaderboardRankings">
 				</tbody>
 			</table>
+			<div id="leaderboardRankingsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 		</div>
 		<div class="col">
 			<h4 class="text-left">Recent Activity</h4>
 			<table class="table table-striped table-dark">
 				<thead>
 					<tr>
-						<th>Track</th>
+						<th class="text-left">Track</th>
 						<th>Rank</th>
 						<th>Time</th>
 						<th>When</th>
 					</tr>
 				</thead>
-				<tbody>
-					@foreach(var entry in Model.RecentActivity)
-					{
-						@if (entry.Sighting != null)
-						{
-							<tr>
-								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Sighting.Leaderboard.ID">@entry.Sighting.Leaderboard.LevelName</a></td>
-								<td>@*TODO*@</td>
-								<td>@Formatter.TimeFromMs(entry.Sighting.Milliseconds) <span class="text-success">New!</span></td>
-								<td>@Formatter.TimeAgoFromUnixTime(entry.TimeUTC)</td>
-							</tr>
-						}
-						else
-						{
-							<tr>
-								<td><a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Improvement.Leaderboard.ID">@entry.Improvement.Leaderboard.LevelName</a></td>
-								<td>@entry.Improvement.NewRank ( <i class="fas fa-arrow-up fa-sm text-success"></i> @(entry.Improvement.OldRank - entry.Improvement.NewRank) )</td>
-								<td>@Formatter.TimeFromMs(entry.Improvement.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.TimeFromMs(entry.Improvement.OldMilliseconds - entry.Improvement.NewMilliseconds) )</td>
-								<td>@Formatter.TimeAgoFromUnixTime(entry.TimeUTC)</td>
-							</tr>
-						}
-					}
+				<tbody id="recentActivity">
 				</tbody>
 			</table>
+			<div id="recentActivityPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 		</div>
 	</div>
 
