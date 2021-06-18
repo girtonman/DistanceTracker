@@ -134,7 +134,9 @@
 </script>
 
 <div class="text-center fade-in">
-	<img src="@await Model.GetSteamAvatar("_full")" />
+	<a href="http://steamcommunity.com/profiles/@Model.SteamID" target="_blank">
+		<img href="" src="@await Model.GetSteamAvatar("_full")" />
+	</a>
 	<h1>@Model.Name</h1>
 	<hr />
 
