@@ -283,3 +283,8 @@ table.small tbody tr td.entry-img img {
 		transform: translateY(0);
 	}
 }
+
+.no-wrap {
+	overflow: hidden;
+	white-space: nowrap;
+}
