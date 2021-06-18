@@ -288,3 +288,10 @@ table.small tbody tr td.entry-img img {
 	overflow: hidden;
 	white-space: nowrap;
 }
+
+.striped-cols {
+	background-color: #212529;
+}
+.striped-cols > div:nth-of-type(odd) {
+	background-color: rgba(255, 255, 255, 0.05);
+}

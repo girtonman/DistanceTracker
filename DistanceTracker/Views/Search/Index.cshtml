@@ -1,36 +1,79 @@
 ﻿@using DistanceTracker.Models
-@model List<Player>
+@model string
 
 @{
 	ViewData["Title"] = $"Player Search";
 }
 
-<div class="text-center">
-	@if (Model != null)
-	{
-		<div class="row">
-			<div class="col">
-				<h4 class="text-left">Search Results</h4>
-				<table class="table table-striped table-dark">
-					<thead>
-						<tr>
-							<th class="text-left">ID</th>
-							<th>Name</th>
-							<th>SteamID</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var player in Model)
-						{
-							<tr>
-								<td>@player.ID</td>
-								<td><a class="link" href="/Player?steamID=@player.SteamID">@player.Name</a></td>
-								<td>@player.SteamID</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
+<script>
+	var debounce = null;
+	jQuery(function () {
+		search();
+		
+		$('#searchQuery').on('input', function () {
+			clearTimeout(debounce);
+			debounce = setTimeout(search, 1000);
+		});
+	});
+
+	function search() {
+		var q = $('#searchQuery').val();
+		var searchResults = $('#searchResults');
+		searchResults.html('');
+		$('#searchPlaceholder').show();
+		$('#noResults').hide();
+		$.ajax({
+			url: '/Search/Players',
+			method: 'GET',
+			data: {
+				q: q
+			},
+			success: async function (data) {
+				$('#searchPlaceholder').hide();
+				for (var i = 0; i < data.length; i++) {
+					var player = data[i];
+					var row = $(`
+						<div class="col-12 text-left pb-2 pt-2">
+							<div class="entry-img no-wrap fade-in d-inline-block align-middle" style="width: 300px;">
+								<img src="${player.steamAvatar}" class="mr-2"/>
+								<a class="link" href="/Player?steamID=${player.steamID}">${player.name}</a>
+							</div>
+							<div class="fade-in d-inline-block align-middle">${player.steamID}</div>
+						</div>
+					`);
+					searchResults.append(row);
+					await new Promise(r => setTimeout(r, 15));
+				}
+
+				if (data.length == 0) {
+					$('#noResults').show();
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load search results');
+			}
+		});
+	};
+</script>
+
+<div class="text-center container">
+	<form class="form mb-4 mt-4 fade-in">
+		<div class="form-group" style="width:100%">
+			<input type="text" class="form-control" id="searchQuery" name="q" placeholder="Enter player name" value="@Model">
 		</div>
-	}
+	</form>
+	<h4 class="text-left fade-in">Search Results (Showing First 50 Results)</h4>
+	<div class="row">
+		<div class="col-12 text-left">
+			<div class="fade-in d-inline-block align-middle" style="width: 300px;">
+				<h5>Name</h5>
+			</div>
+			<div class="fade-in d-inline-block align-middle"><h5>Steam ID64</h5></div>
+		</div>
+		<div class="col-12 text-center">
+			<div id="searchPlaceholder" class="lds-ellipsis mt-4"><div></div><div></div><div></div><div></div></div>
+		</div>
+		<div id="noResults" class="col-12 text-center mt-4"><h2>No results 😐</h2></div>
+	</div>
+	<div class="row striped-cols" id="searchResults"></div>
 </div>
