@@ -40,10 +40,7 @@ namespace DistanceTracker.Controllers
 			return View(viewModel);
 		}
 
-		public async Task<IActionResult> Levels()
-		{
-			return View();
-		}
+		public IActionResult Levels() => View();
 
 		public async Task<IActionResult> GetLevels()
 		{
