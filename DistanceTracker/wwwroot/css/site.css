@@ -123,20 +123,20 @@ body {
 }
 
 /* Avatar td entries */
-table tbody tr td.entry-avatar {
+table tbody tr td.entry-img {
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
 
-table tbody tr td.entry-avatar img {
+table tbody tr td.entry-img img {
 	aspect-ratio: 1;
-	height: 40px;
+	max-height: 40px;
 	margin-right: 5px;
 }
 
-table.small tbody tr td.entry-avatar img {
+table.small tbody tr td.entry-img img {
 	aspect-ratio: 1;
-	height: 35px;
+	max-height: 35px;
 	margin-right: 5px;
 }
 
@@ -282,4 +282,16 @@ table.small tbody tr td.entry-avatar img {
 		opacity: 1;
 		transform: translateY(0);
 	}
+}
+
+.no-wrap {
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.striped-cols {
+	background-color: #212529;
+}
+.striped-cols > div:nth-of-type(odd) {
+	background-color: rgba(255, 255, 255, 0.05);
 }

@@ -45,7 +45,7 @@ $('#pills-tab a').on('click', function (e) {
 		</div>
 		<div class="col-3">
 			<h5 class="stroke">Record Age</h5>
-			<h2 class="stroke">@Formatter.TimeAgoFromUnixTime(BestEntry.FirstSeenTimeUTC)</h2>
+			<h2 class="stroke">@Formatter.TimeAgoFromUnixTime(BestEntry.UpdatedTimeUTC)</h2>
 		</div>
 		<div class="col-3">
 			<h5 class="stroke">World Record</h5>
@@ -114,7 +114,7 @@ $('#pills-tab a').on('click', function (e) {
 								@foreach(var entry in Model.RecentImprovements)
 								{
 									<tr>
-										<td class="text-left entry-avatar">
+										<td class="text-left entry-img">
 											<img src="@await entry.Player.GetSteamAvatar()" />
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
@@ -141,7 +141,7 @@ $('#pills-tab a').on('click', function (e) {
 								@foreach (var entry in Model.RecentFirstSightings)
 								{
 									<tr>
-										<td class="text-left entry-avatar">
+										<td class="text-left entry-img">
 											<img src="@await entry.Player.GetSteamAvatar()" />
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
@@ -180,7 +180,7 @@ $('#pills-tab a').on('click', function (e) {
 									</div>
 									@entry.Rank
 								</td>
-								<td class="text-left entry-avatar">
+								<td class="text-left entry-img">
 									<img src="@await entry.Player.GetSteamAvatar()" />
 									<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 								</td>

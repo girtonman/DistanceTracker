@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DistanceTracker.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 
 namespace DistanceTracker
 {
@@ -34,7 +36,11 @@ namespace DistanceTracker
 				services.AddControllersWithViews().AddRazorRuntimeCompilation();
 			}
 
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0).AddNewtonsoftJson(options =>
+			{
+				options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+				options.SerializerSettings.Converters.Add(new NumberToStringConverter());
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

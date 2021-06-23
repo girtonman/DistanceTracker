@@ -1,6 +1,8 @@
 ﻿using DistanceTracker.DALs;
 using DistanceTracker.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.Controllers
@@ -14,18 +16,42 @@ namespace DistanceTracker.Controllers
 			return View(siteStats);
 		}
 
-		public async Task<IActionResult> GlobalActivity()
+		public IActionResult GlobalActivity() => View();
+
+		public async Task<IActionResult> GetGlobalRecentActivity()
 		{
-			var lehDAL = new LeaderboardEntryHistoryDAL();
 			var leDAL = new LeaderboardEntryDAL();
-			var viewModel = new HomepageViewModel
+			var lehDAL = new LeaderboardEntryHistoryDAL();
+			var recentFirstSightings = await leDAL.GetRecentFirstSightings(100);
+			var recentImprovements = await lehDAL.GetRecentImprovements(100);
+
+			var recentActivity = new List<Activity>();
+			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
 			{
-				RecentImprovements = await lehDAL.GetRecentImprovements(100),
-				RecentFirstSightings = await leDAL.GetRecentFirstSightings(100)
-			};
+				TimeUTC = x.FirstSeenTimeUTC,
+				Sighting = x,
+			}));
+			recentImprovements.ForEach(x => recentActivity.Add(new Activity()
+			{
+				TimeUTC = x.UpdatedTimeUTC,
+				Improvement = x,
+			}));
 
+			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).ToList();
 
-			return View(viewModel);
+			foreach (var activity in recentActivity)
+			{
+				if(activity.Sighting != null)
+				{
+					await activity.Sighting.Player.GetSteamAvatar();
+				}
+				else if(activity.Improvement != null)
+				{
+					await activity.Improvement.Player.GetSteamAvatar();
+				}
+			}
+
+			return new JsonResult(recentActivity);
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

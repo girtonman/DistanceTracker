@@ -1,23 +1,30 @@
 ﻿using DistanceTracker.DALs;
 using DistanceTracker.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.Controllers
 {
 	public class SearchController : Controller
 	{
-		public async Task<IActionResult> Index(string q)
+		public IActionResult Index(string q) => View("Index", q);
+
+		public async Task<IActionResult> Players(string q)
 		{
-			if(string.IsNullOrEmpty(q))
+			if (string.IsNullOrEmpty(q))
 			{
-				return View();
+				return new JsonResult(new List<Player>());
 			}
 
 			var dal = new PlayerDAL();
 			var players = await dal.SearchByName(q);
+			foreach (var player in players)
+			{
+				await player.GetSteamAvatar();
+			}
 
-			return View(players);
+			return new JsonResult(players);
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

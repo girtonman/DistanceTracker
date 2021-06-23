@@ -40,7 +40,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<Player>> SearchByName(string name)
 		{
 			Connection.Open();
-			var sql = $"SELECT ID, SteamID, Name, SteamAvatar FROM Players WHERE `Name` LIKE @search";
+			var sql = $"SELECT ID, SteamID, Name, SteamAvatar FROM Players WHERE `Name` LIKE @search LIMIT 50";
 			var command = new MySqlCommand(sql, Connection);
 			command.Parameters.AddWithValue("@search", $"%{name}%");
 			var reader = await command.ExecuteReaderAsync();

@@ -21,6 +21,7 @@
 		}
 		public ulong Milliseconds { get; set; }
 		public ulong FirstSeenTimeUTC { get; set; }
+		public ulong UpdatedTimeUTC { get; set; }
 		public Player Player { get; set; }
 		public Leaderboard Leaderboard { get; set; }
 	}

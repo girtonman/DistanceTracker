@@ -14,6 +14,7 @@
 		}
 		public ulong SteamID { get; set; }
 		public ulong FirstSeenTimeUTC { get; set; }
+		public ulong UpdatedTimeUTC { get; set; }
 		public Leaderboard Leaderboard { get; set; }
 		public Player Player { get; set; }
 	}

@@ -71,6 +71,53 @@ namespace DistanceTracker.Controllers
 			return new JsonResult(recentActivity);
 		}
 
+		public async Task<IActionResult> Compare(string steamIDs)
+		{
+			if (string.IsNullOrWhiteSpace(steamIDs))
+			{
+				return View(null);
+			}
+
+			var leDAL = new LeaderboardEntryDAL();
+			var lDAL = new LeaderboardDAL();
+			var pDAL = new PlayerDAL();
+			var leaderboards = await lDAL.GetAllLeaderboards();
+
+			// Make sure the list of steam IDs is unique
+			var steamIDList = steamIDs.Split(",").Select(x => ulong.Parse(x)).ToList();
+			steamIDList = steamIDList.GroupBy(x => x).Select(x => x.First()).ToList();
+			var entriesList = new Dictionary<ulong, List<RankedLeaderboardEntry>>();
+			var players = new List<Player>();
+
+			foreach (var steamID in steamIDList)
+			{
+				entriesList.Add(steamID, await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID));
+				players.Add(await pDAL.GetPlayer(steamID));
+			}
+
+			var viewModel = new PlayerComparisonViewModel()
+			{
+				Comparisons = new List<PlayerComparisonEntry>(),
+				Players = players,
+				SteamIDs = steamIDs,
+			};
+
+			foreach (var leaderboard in leaderboards.OrderBy(x => x.ID))
+			{
+				var comparison = new PlayerComparisonEntry();
+				comparison.Leaderboard = leaderboard;
+				comparison.RankedEntries = new Dictionary<ulong, RankedLeaderboardEntry>();
+				foreach (var player in players)
+				{
+					var entry = entriesList[player.SteamID].FirstOrDefault(x => x.Leaderboard.ID == leaderboard.ID);
+					comparison.RankedEntries.Add(player.SteamID, entry);
+				}
+				viewModel.Comparisons.Add(comparison);
+			}
+
+			return View(viewModel);
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

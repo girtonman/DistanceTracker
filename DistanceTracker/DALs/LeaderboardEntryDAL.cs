@@ -17,7 +17,7 @@ namespace DistanceTracker.DALs
 		public async Task<Dictionary<ulong, LeaderboardEntry>> GetLeaderboardEntries(int leaderboardID)
 		{
 			Connection.Open();
-			var sql = $"SELECT ID, LeaderboardID, Milliseconds, SteamID, FirstSeenTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}";
+			var sql = $"SELECT ID, LeaderboardID, Milliseconds, SteamID, FirstSeenTimeUTC, UpdatedTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -32,6 +32,7 @@ namespace DistanceTracker.DALs
 					Milliseconds = reader.GetUInt64(2),
 					SteamID = steamID,
 					FirstSeenTimeUTC = reader.GetUInt64(4),
+					UpdatedTimeUTC = reader.GetUInt64(5),
 				});
 			}
 			reader.Close();
@@ -44,7 +45,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = @$"
-				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, p.SteamAvatar FROM LeaderboardEntries le 
+				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar FROM LeaderboardEntries le 
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID 
 				LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
@@ -72,6 +73,7 @@ namespace DistanceTracker.DALs
 					Milliseconds = reader.GetUInt64(2),
 					SteamID = reader.GetUInt64(3),
 					FirstSeenTimeUTC = reader.GetUInt64(5),
+					UpdatedTimeUTC = reader.GetUInt64(6),
 				};
 				le.Leaderboard = new Leaderboard()
 				{
@@ -82,7 +84,7 @@ namespace DistanceTracker.DALs
 				{
 					SteamID = le.SteamID,
 					Name = reader.GetString(4),
-					SteamAvatar = reader.IsDBNull(6) ? null : reader.GetString(6),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
 				};
 				leaderboardEntries.Add(le);
 			}
@@ -303,14 +305,14 @@ namespace DistanceTracker.DALs
 					le.SteamID,
 					p.Name,
 					le.Milliseconds,
-					le.FirstSeenTimeUTC,
+					le.UpdatedTimeUTC,
 					p.SteamAvatar
 				FROM(
 					SELECT
 						*,
 						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 					FROM(
-							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds ASC) as `Rank`, FirstSeenTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
+							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds ASC) as `Rank`, FirstSeenTimeUTC, UpdatedTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
 					) ranks
 				) le
 				LEFT JOIN Players p ON p.SteamID = le.SteamID
@@ -328,7 +330,7 @@ namespace DistanceTracker.DALs
 					NoodlePoints = reader.GetDouble(1),
 					PlayerRating = reader.GetDouble(2),
 					Milliseconds = reader.GetUInt64(5),
-					FirstSeenTimeUTC = reader.GetUInt64(6),
+					UpdatedTimeUTC = reader.GetUInt64(6),
 				};
 				rle.Player = new Player()
 				{
