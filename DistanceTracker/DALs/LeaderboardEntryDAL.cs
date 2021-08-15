@@ -148,6 +148,33 @@ namespace DistanceTracker.DALs
 			return globalLeaderboardEntries;
 		}
 
+		public async Task<ulong> GetOptimalTotalTime()
+		{
+			Connection.Open();
+			var sql = @"
+				SELECT
+					SUM(le.MinMilliseconds)
+				FROM Leaderboards l
+				LEFT JOIN (
+					SELECT
+						LeaderboardID,
+						MIN(Milliseconds) AS MinMilliseconds
+					FROM LeaderboardEntries
+					GROUP BY LeaderboardID
+				) le ON le.LeaderboardID = l.ID";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			while (reader.Read())
+			{
+				return reader.GetUInt64(0);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return 0;
+		}
+
 		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID)
 		{
 			Connection.Open();

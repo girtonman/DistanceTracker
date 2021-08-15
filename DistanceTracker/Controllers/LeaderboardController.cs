@@ -16,6 +16,7 @@ namespace DistanceTracker.Controllers
 			{
 				LeaderboardEntries = await leDAL.GetGlobalLeaderboard(),
 				WinnersCircle = await leDAL.GetGlobalWinnersCircle(),
+				OptimalTotalTime = await leDAL.GetOptimalTotalTime(),
 			};
 
 			// Add global time improvements to the entries
