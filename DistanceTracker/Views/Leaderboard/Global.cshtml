@@ -95,6 +95,14 @@
 						<tr>
 							<td class="text-left">@entry.Rank</td>
 							<td class="text-left"><a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a></td>
+							<td>
+								@Formatter.TimeFromMs(entry.TotalMilliseconds)
+								@if(entry.LastWeeksGlobalTimeImprovement > 0)
+								{
+									@Html.Raw($"( <i class=\"fas fa-arrow-up fa-sm text-success\"></i> {Formatter.TimeFromMs(entry.LastWeeksGlobalTimeImprovement)} )")
+								}
+							</td>
+							<td>@entry.NumTracksCompleted</td>
 							<td>@entry.NoodlePoints.ToString("0")</td>
 							<td>@entry.PlayerRating.ToString("0.00")</td>
 						</tr>
