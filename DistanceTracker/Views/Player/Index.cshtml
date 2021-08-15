@@ -6,10 +6,35 @@
 }
 
 <script>
+	var leaderboardRankings = [];
+	var leaderboardSortingEnabled = false;
+	var leaderboardRankingSort = 'asc';
+
 	jQuery(function () {
 		getGlobalStats();
 		getLeaderboardRankings();
 		getRecentActivity();
+		$('#toggleLeaderboardRankingSort').click(() => {
+			if (leaderboardSortingEnabled) {
+				leaderboardSortingEnabled = false;
+
+				// Toggle the sort order
+				leaderboardRankingSort = leaderboardRankingSort == 'asc' ? 'desc' : 'asc';
+
+				// Update the header arrow
+				if (leaderboardRankingSort == 'asc') {
+					$('#leaderboardRankingSortArrow').removeClass('fa-arrow-down');
+					$('#leaderboardRankingSortArrow').addClass('fa-arrow-up');
+				}
+				else if (leaderboardRankingSort == 'desc') {
+					$('#leaderboardRankingSortArrow').removeClass('fa-arrow-up');
+					$('#leaderboardRankingSortArrow').addClass('fa-arrow-down');
+				}
+
+				// Sort and render
+				handleLeaderboardRankings();
+			}
+		});
 	});
 
 	function getGlobalStats() {
@@ -49,31 +74,52 @@
 			data: {
 				steamID: '@Model.SteamID'
 			},
-			success: async function (data) {
+			success: function (data) {
 				$('#leaderboardRankingsPlaceholder').hide();
-				var leaderboardRankings = $('#leaderboardRankings');
-				for (var i = 0; i < data.length; i++) {
-					var rankedEntry = data[i];
-					var row = $(`
-						<tr>
-							<td class="text-left"><div class="fade-in">
-								<a class="link" href="/Leaderboard/Level?leaderboardID=${rankedEntry.leaderboard.id}">
-									${rankedEntry.leaderboard.levelName}
-								</a>
-							</div></td>
-							<td><div class="fade-in">${rankedEntry.rank}</div></td>
-							<td><div class="fade-in">${rankedEntry.noodlePointsString}</div></td>
-							<td><div class="fade-in">${rankedEntry.playerRatingString}</div></td>
-						</tr>
-					`);
-					leaderboardRankings.append(row);
-					await new Promise(r => setTimeout(r, 15));
-				}
+				leaderboardRankings = data;
+				handleLeaderboardRankings();
 			},
 			error: function () {
 				toastr.error('Failed to load global stats for this player');
 			}
 		});
+	};
+
+	async function handleLeaderboardRankings() {
+		// Sort the leaderboard entries
+		if (leaderboardRankingSort == 'asc') {
+			leaderboardRankings.sort((entry1, entry2) => {
+				return entry1.rank - entry2.rank;
+			});
+		}
+		else if (leaderboardRankingSort == 'desc') {
+			leaderboardRankings.sort((entry1, entry2) => {
+				return entry2.rank - entry1.rank;
+			});
+		}
+
+		// Fill in the leaderboard rankings table
+		var leaderboardRankingsTable = $('#leaderboardRankingsTable');
+		leaderboardRankingsTable.html('');
+		for (var i = 0; i < leaderboardRankings.length; i++) {
+			var rankedEntry = leaderboardRankings[i];
+			var row = $(`
+			<tr>
+				<td class="text-left"><div class="fade-in">
+					<a class="link" href="/Leaderboard/Level?leaderboardID=${rankedEntry.leaderboard.id}">
+						${rankedEntry.leaderboard.levelName}
+					</a>
+				</div></td>
+				<td><div class="fade-in">${rankedEntry.rank}</div></td>
+				<td><div class="fade-in">${rankedEntry.noodlePointsString}</div></td>
+				<td><div class="fade-in">${rankedEntry.playerRatingString}</div></td>
+			</tr>
+		`);
+			leaderboardRankingsTable.append(row);
+			await new Promise(r => setTimeout(r, 15));
+		}
+
+		leaderboardSortingEnabled = true;
 	};
 
 	function getRecentActivity() {
@@ -85,7 +131,6 @@
 			},
 			success: async function (data) {
 				$('#recentActivityPlaceholder').hide();
-				console.log(data)
 				var recentActivity = $('#recentActivity');
 				for (var i = 0; i < data.length; i++) {
 					var activity = data[i];
@@ -166,16 +211,18 @@
 	<div class="row">
 		<div class="col-4">
 			<h4 class="text-left">Track Rankings</h4>
-			<table class="table table-striped table-dark">
+			<table class="table table-striped table-dark" style="table-layout: fixed">
 				<thead>
 					<tr>
 						<th class="text-left">Track</th>
-						<th>Rank</th>
-						<th>Points</th>
-						<th>Rating</th>
+						<th style="width: 100px">
+							<span id="toggleLeaderboardRankingSort" class="pointer">Rank</span>&nbsp;
+							<i id="leaderboardRankingSortArrow" class="fas fa-arrow-up fa-sm"></i></th>
+						<th style="width: 100px">Points</th>
+						<th style="width: 100px">Rating</th>
 					</tr>
 				</thead>
-				<tbody id="leaderboardRankings">
+				<tbody id="leaderboardRankingsTable">
 				</tbody>
 			</table>
 			<div id="leaderboardRankingsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>

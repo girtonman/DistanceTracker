@@ -43,6 +43,9 @@ namespace DistanceTracker.Controllers
 		{
 			var leDAL = new LeaderboardEntryDAL();
 			var rankedLeaderboardEntries = await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID);
+			rankedLeaderboardEntries = rankedLeaderboardEntries
+				.OrderBy(x => x.Rank)
+				.ToList();
 
 			return new JsonResult(rankedLeaderboardEntries);
 		}
