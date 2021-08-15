@@ -4,16 +4,22 @@ namespace DistanceTracker
 {
 	public class Formatter
 	{
+
 		public static string TimeFromMs(ulong milliseconds)
+		{
+			return TimeFromMs((long)milliseconds);
+		}
+
+		public static string TimeFromMs(long milliseconds)
 		{
 			var seconds = milliseconds / 1000.0;
 			var minutes = seconds / 60.0;
 			var hours = minutes / 60.0;
 
 			var output = "";
-			output += hours < 1 ? "" : $"{Math.Truncate(hours):0}:";
-			output += hours > 0 || minutes > 10 ? $"{Math.Truncate(minutes % 60.0):00}:" : minutes > 0 ? $"{(Math.Truncate(minutes % 60.0)):0}:" : "";
-			output += minutes > 0 || seconds > 10 ? $"{(Math.Truncate(seconds % 60.0)):00}" : $"{(Math.Truncate(seconds % 60.0)):0}";
+			output += hours >= 1 ? $"{Math.Truncate(hours):0}:" : "";
+			output += hours >= 1 || minutes >= 10 ? $"{Math.Truncate(minutes % 60.0):00}:" : minutes >= 1 ? $"{(Math.Truncate(minutes % 60.0)):0}:" : "";
+			output += minutes >= 1 || seconds >= 10 ? $"{(Math.Truncate(seconds % 60.0)):00}" : $"{(Math.Truncate(seconds % 60.0)):0}";
 			output += $".{(Math.Truncate(milliseconds % 1000.0)):000}s";
 			return output;
 		}
