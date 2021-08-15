@@ -295,3 +295,7 @@ table.small tbody tr td.entry-img img {
 .striped-cols > div:nth-of-type(odd) {
 	background-color: rgba(255, 255, 255, 0.05);
 }
+
+.pointer {
+	cursor: pointer;
+}
