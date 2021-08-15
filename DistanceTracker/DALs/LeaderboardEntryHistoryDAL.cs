@@ -124,5 +124,32 @@ namespace DistanceTracker.DALs
 
 			return entries;
 		}
+
+		public async Task<Dictionary<ulong, long>> GetGlobalPastWeeksImprovement(List<ulong> steamIDs = null)
+		{
+			Connection.Open();
+			var sql = @$"
+				SELECT 
+					leh.SteamID,
+					SUM(OldMilliseconds) - SUM(NewMilliseconds)
+				FROM LeaderboardEntryHistory leh 
+				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
+				LEFT JOIN Players p on p.SteamID = leh.SteamID
+				WHERE leh.UpdatedTimeUTC > {DateTimeOffset.UtcNow.AddDays(-7).ToUnixTimeMilliseconds()}
+				{(steamIDs == null ? "" : $"AND leh.SteamID IN ({string.Join(',', steamIDs)})")}
+				GROUP BY leh.SteamID";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var globalTimeImprovements = new Dictionary<ulong, long>();
+			while (reader.Read())
+			{
+				globalTimeImprovements.Add(reader.GetUInt64(0), reader.GetInt64(1));
+			}
+			reader.Close();
+			Connection.Close();
+
+			return globalTimeImprovements;
+		}
 	}
 }
