@@ -382,26 +382,25 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = $@"
-				SELECT
+				SELECT 
 					p.Name,
-					COUNT(*) AS `Count`
-				FROM
-				(
+					fpc.Count
+				FROM Players p
+				JOIN (
 					SELECT 
-						l.ID AS LeaderboardID,
-						(
-		 					SELECT SteamID
-		 					FROM LeaderboardEntries
-		 					WHERE LeaderboardID = l.ID
-		 					ORDER BY Milliseconds ASC
-		 					LIMIT 1
-						) AS SteamID
-					FROM Leaderboards l
-				) fpe
-				LEFT JOIN Players p ON p.SteamID = fpe.SteamID
-				WHERE p.Name IS NOT NULL
-				GROUP BY p.Name
-				ORDER BY `Count` DESC";
+						SteamID, 
+						COUNT(SteamID) Count
+					FROM LeaderboardEntries le
+					JOIN (
+						SELECT 
+							LeaderboardID,
+							MIN(Milliseconds) MinTime
+						FROM LeaderboardEntries
+						GROUP BY LeaderboardID
+					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
+					GROUP BY SteamID
+				) fpc ON fpc.SteamID = p.SteamID
+				ORDER BY fpc.Count DESC";
 
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
