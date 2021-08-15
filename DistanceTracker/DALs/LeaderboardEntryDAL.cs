@@ -94,7 +94,7 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<RankedLeaderboardEntry>> GetGlobalLeaderboard(int numRows = 100)
+		public async Task<List<GlobalRankedLeaderboardEntry>> GetGlobalLeaderboard(int numRows = 100)
 		{
 			Connection.Open();
 			var sql = @"
@@ -108,13 +108,15 @@ namespace DistanceTracker.DALs
 						RANK() OVER(
 						  ORDER BY SUM(NoodlePoints) DESC
 						) as GlobalRank,
-						SUM(NoodlePoints) as NoodlePoints
+						SUM(NoodlePoints) AS NoodlePoints,
+						SUM(Milliseconds) AS Milliseconds,
+						COUNT(*) AS NumTracksCompleted
 					FROM(
 						SELECT
 							*,
 							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 						FROM(
-								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
+								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS `Rank` FROM LeaderboardEntries
 						) ranks
 					) le
 					GROUP BY SteamID
@@ -125,22 +127,24 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			var globalLeaderboardEntries = new List<RankedLeaderboardEntry>();
+			var globalLeaderboardEntries = new List<GlobalRankedLeaderboardEntry>();
 			while (reader.Read())
 			{
-				var gle = new RankedLeaderboardEntry()
+				var grle = new GlobalRankedLeaderboardEntry()
 				{
 					Rank = reader.GetInt32(1),
 					NoodlePoints = reader.GetDouble(2),
-					PlayerRating = reader.GetDouble(3),
+					TotalMilliseconds = reader.GetUInt64(3),
+					NumTracksCompleted = reader.GetUInt32(4),
+					PlayerRating = reader.GetDouble(5),
 				};
-				gle.Player = new Player()
+				grle.Player = new Player()
 				{
 					SteamID = reader.GetUInt64(0),
-					Name = reader.GetString(4),
-					SteamAvatar = reader.IsDBNull(5) ? null : reader.GetString(5),
+					Name = reader.GetString(6),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
 				};
-				globalLeaderboardEntries.Add(gle);
+				globalLeaderboardEntries.Add(grle);
 			}
 			reader.Close();
 			Connection.Close();
