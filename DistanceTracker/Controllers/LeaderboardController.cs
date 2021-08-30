@@ -9,18 +9,15 @@ namespace DistanceTracker.Controllers
 	{
 		public async Task<IActionResult> Global()
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-
+			var dal = new LeaderboardEntryDAL();
 			var viewModel = new GlobalLeaderboardViewModel
 			{
-				LeaderboardEntries = await leDAL.GetGlobalLeaderboard(),
-				WinnersCircle = await leDAL.GetGlobalWinnersCircle(),
-				OptimalTotalTime = await leDAL.GetOptimalTotalTime(),
+				LeaderboardEntries = await dal.GetGlobalLeaderboard(),
+				WinnersCircle = await dal.GetGlobalWinnersCircle()
 			};
 
 			// Add global time improvements to the entries
-			var globalTimeImprovements = await lehDAL.GetGlobalPastWeeksImprovement();
+			var globalTimeImprovements = await dal.GetGlobalPastWeeksImprovement();
 			foreach(var entry in viewModel.LeaderboardEntries)
 			{
 				var steamID = entry.Player.SteamID;
@@ -29,6 +26,8 @@ namespace DistanceTracker.Controllers
 					entry.LastWeeksGlobalTimeImprovement = globalTimeImprovements[steamID];
 				}
 			}
+
+			//var mostImprovedTime = 
 
 			return View(viewModel);
 		}

@@ -54,8 +54,8 @@ namespace DistanceTracker.Controllers
 		{
 			var leDAL = new LeaderboardEntryDAL();
 			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var recentFirstSightings = await leDAL.GetRecentFirstSightings(10, steamID);
-			var recentImprovements = await lehDAL.GetRecentImprovements(10, steamID);
+			var recentFirstSightings = await leDAL.GetRecentFirstSightings(40, steamID);
+			var recentImprovements = await lehDAL.GetRecentImprovements(40, steamID);
 
 			var recentActivity = new List<Activity>();
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
@@ -69,7 +69,7 @@ namespace DistanceTracker.Controllers
 				Improvement = x,
 			}));
 
-			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).ToList();
+			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).Take(40).ToList();
 
 			return new JsonResult(recentActivity);
 		}
