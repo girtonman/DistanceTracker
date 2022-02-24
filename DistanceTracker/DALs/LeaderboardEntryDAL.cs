@@ -1,6 +1,7 @@
 ﻿using DistanceTracker.Models;
 using MySqlConnector;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.DALs
@@ -420,6 +421,91 @@ namespace DistanceTracker.DALs
 			Connection.Close();
 
 			return winnersCircle;
+		}
+
+		public async Task<List<IGrouping<uint, HistogramDataPoint>>> GetHistogramDataPoints()
+		{
+			Connection.Open();
+			var sql = $@"
+				SELECT 
+					FLOOR(Milliseconds/1000)*1000 AS BucketFloor,
+					COUNT(*) AS BucketCount,
+					LeaderboardID
+				FROM (SELECT * FROM LeaderboardEntries WHERE Milliseconds <= 300000) clamped_le
+				GROUP BY LeaderboardID, 1";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var histogramData = new List<HistogramDataPoint>();
+			while (reader.Read())
+			{
+				var dataPoint = new HistogramDataPoint()
+				{
+					BucketFloor = reader.GetUInt64(0),
+					BucketCount = reader.GetUInt64(1),
+					LeaderboardID = reader.GetUInt32(2),
+				};
+
+				histogramData.Add(dataPoint);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return histogramData
+				.OrderBy(x => x.BucketFloor)
+				.GroupBy(x => x.LeaderboardID)
+				.ToList();
+		}
+
+		public async Task<List<PercentileRank>> GetPercentileRanks(ulong steamID)
+		{
+			Connection.Open();
+			var sql = @"
+				SELECT
+					le.Milliseconds,
+					le.Percentile * 100 AS Percentile,
+					le.LeaderboardID,
+					l.LevelName,
+					l.LeaderboardName,
+					l.LevelSet
+				FROM(
+					SELECT
+						*
+					FROM(
+							SELECT
+								Milliseconds,
+								LeaderboardID,
+								SteamID,
+								PERCENT_RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS Percentile
+							FROM LeaderboardEntries
+					) ranks
+				) le
+				LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
+				WHERE le.SteamID = " + steamID;
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var percentileRanks = new List<PercentileRank>();
+			while (reader.Read())
+			{
+				var percentileRank = new PercentileRank()
+				{
+					Milliseconds = reader.GetUInt64(0),
+					Percentile = reader.GetFloat(1),
+					LeaderboardID = reader.GetUInt32(2),
+					LevelName = reader.GetString(3),
+					LeaderboardName = reader.GetString(4),
+					LevelSet = reader.GetString(5),
+				};
+
+				percentileRanks.Add(percentileRank);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return percentileRanks;
 		}
 	}
 }

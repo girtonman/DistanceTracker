@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using DistanceTracker.Models;
+using MySqlConnector;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -73,6 +74,50 @@ namespace DistanceTracker.DALs
 			await command.ExecuteNonQueryAsync();
 
 			Connection.Close();
+		}
+
+		public async Task<FunStats> GetFunStats(ulong steamID)
+		{
+			Connection.Open();
+			var sql = $@"
+				WITH
+				  TracksCompleted AS(SELECT COUNT(*) AS TracksCompleted FROM LeaderboardEntries WHERE SteamID = {steamID}),
+				  TotalImprovements AS(SELECT COUNT(*) AS TotalImprovements FROM LeaderboardEntryHistory WHERE SteamID = {steamID}),
+				  FirstSeenTime AS(SELECT FirstSeenTimeUTC FROM LeaderboardEntries WHERE SteamID = {steamID} ORDER BY FirstSeenTimeUTC ASC LIMIT 1),
+				  MostActiveLevel AS(
+				  SELECT
+						COUNT(*) AS MostImprovements,
+						LevelName AS MostImprovementsLevel
+					FROM (
+						SELECT
+							l.LevelName
+						FROM LeaderboardEntryHistory leh
+						LEFT JOIN Leaderboards l ON l.ID = leh.LeaderboardID
+						WHERE SteamID = {steamID}
+					) sub
+					GROUP BY LevelName
+					LIMIT 1
+				)
+				SELECT* FROM TracksCompleted JOIN TotalImprovements JOIN FirstSeenTime JOIN MostActiveLevel";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			FunStats funStats = null;
+			while (reader.Read())
+			{
+				funStats = new FunStats()
+				{
+					TracksCompleted = reader.GetInt32(0),
+					TotalImprovements = reader.GetInt32(1),
+					FirstSeenTimeUTC = reader.GetUInt64(2),
+					MostImprovements = reader.GetInt32(3),
+					MostImprovementsLevel = reader.GetString(4),
+				};
+			}
+			reader.Close();
+			Connection.Close();
+
+			return funStats;
 		}
 	}
 }

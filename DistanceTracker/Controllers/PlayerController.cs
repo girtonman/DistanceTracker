@@ -21,19 +21,22 @@ namespace DistanceTracker.Controllers
 		{
 			var leDAL = new LeaderboardEntryDAL();
 			var lehDAL = new LeaderboardEntryHistoryDAL();
+			var pDAL = new PlayerDAL();
 
 			var globalRanking = await leDAL.GetGlobalRankingForPlayer(steamID);
 
 			var lastWeeksImprovements = await lehDAL.GetPastWeeksImprovements(steamID);
 			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
 			var oldGlobalRank = await leDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
+			var funStats = await pDAL.GetFunStats(steamID);
 
 			var stats = new PlayerGlobalStats
 			{
 				GlobalLeaderboardEntry = globalRanking,
 				LastWeeksRankImprovement = oldGlobalRank.Rank - globalRanking.Rank,
 				LastWeeksPointsImprovement = pointsImprovement,
-				LastWeeksRatingImprovement = (double)pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS) * 100
+				LastWeeksRatingImprovement = (double)pointsImprovement / (NoodlePointsUtil.MAX_POINTS_PER_MAP * NoodlePointsUtil.NUM_OFFICIAL_SPRINTS) * 100,
+				FunStats = funStats,
 			};
 
 			return new JsonResult(stats);
@@ -119,6 +122,48 @@ namespace DistanceTracker.Controllers
 			}
 
 			return View(viewModel);
+		}
+
+		public async Task<IActionResult> GetHistogramData(ulong steamID)
+		{
+			var leDAL = new LeaderboardEntryDAL();
+			var percentileRanks = await leDAL.GetPercentileRanks(steamID);
+			var groupedHistogramDataPoints = await leDAL.GetHistogramDataPoints();
+
+			var histograms = new List<HistogramViewModel>();
+			foreach (var percentileRank in percentileRanks)
+			{
+				// Create the basic histogram info
+				var histogram = new HistogramViewModel()
+				{
+					Percentile = percentileRank.Percentile,
+					Milliseconds = percentileRank.Milliseconds,
+					BucketKeys = new List<ulong>(),
+					BucketCounts = new List<ulong>(),
+					Leaderboard = new Leaderboard()
+					{
+						ID = percentileRank.LeaderboardID,
+						LevelName = percentileRank.LevelName,
+						LeaderboardName = percentileRank.LeaderboardName,
+						LevelSet = percentileRank.LevelSet,
+					},
+				};
+
+				// Create the data point dictionary for the histogram
+				var histogramDataPoints = groupedHistogramDataPoints
+					.First(x => x.Key == percentileRank.LeaderboardID)
+					.OrderBy(x => x.BucketFloor)
+					.ToList();
+				foreach (var dataPoint in histogramDataPoints)
+				{
+					histogram.BucketKeys.Add(dataPoint.BucketFloor);
+					histogram.BucketCounts.Add(dataPoint.BucketCount);
+				}
+
+				histograms.Add(histogram);
+			}
+
+			return new JsonResult(histograms.GroupBy(x => x.Leaderboard.LevelSet).ToDictionary(x => x.Key, x => x.ToList()));
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
