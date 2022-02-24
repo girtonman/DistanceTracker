@@ -4,7 +4,7 @@
 
 <style>
 .level-card .card {
-	background-color: #383838;
+	background-color: #32383e;
 }
 </style>
 
@@ -21,24 +21,35 @@
 				$('#levelsPlaceholder').hide();
 				var levels = $('#levels');
 				for (var i = 0; i < data.length; i++) {
-					var level = data[i];
-					var row = $(`
-						<div class="col-3 level-card fade-in">
-							<a class="link" href="/Leaderboard/Level?leaderboardid=${level.id}">
-								<div class="card box-shadow" style="margin: 15px 0px 15px 0px;">
-									<img class="card-img-top" src="/images/${level.levelName}.bytes.png">
-									<div class="card-body">
-										<h5 class="card-title">${level.levelName}</h5>
-										${level.entryCount == null ? '' : `<h6 class="card-subtitle mb-2">${level.entryCount} Entries</h6>`}
-										${level.latestUpdateUTC == null ? '' : `<h6 class="card-subtitle mb-2">Last Activity ${level.timeAgoString}</h6>`}
-									</div>
+					var levelSet = data[i];
+					for (var j = 0; j < data[i].length; j++) {
+						var level = levelSet[j];
+						if (j == 0) {
+							levels.append(`
+								<div class="col-12 fade-in text-left">
+									<h1 style="margin-top: 30px;">${level.levelSet}</h1>
+									<hr />
 								</div>
-							</a>
-						</div>
-					`);
-					levels.append(row);
-					if ((i + 1) % 4 == 0 && i > 0) {
-						await new Promise(r => setTimeout(r, 100));
+							`);
+						}
+						var row = $(`
+							<div class="col-3 level-card fade-in">
+								<a class="link" href="/Leaderboard/Level?leaderboardid=${level.id}">
+									<div class="card box-shadow" style="margin: 15px 0px 15px 0px;">
+										<img class="card-img-top" src="/images/${level.levelName}.bytes.png">
+										<div class="card-body">
+											<h5 class="card-title">${level.levelName}</h5>
+											${level.entryCount == null ? '' : `<h6 class="card-subtitle mb-2">${level.entryCount} Entries</h6>`}
+											${level.latestUpdateUTC == null ? '' : `<h6 class="card-subtitle mb-2">Last Activity ${level.timeAgoString}</h6>`}
+										</div>
+									</div>
+								</a>
+							</div>
+						`);
+						levels.append(row);
+						if ((j + 1) % 4 == 0 && j > 0) {
+							await new Promise(r => setTimeout(r, 100));
+						}
 					}
 				}
 			},
@@ -52,7 +63,6 @@
 <div class="container text-center fade-in">
 	<div class="row">
 		<div class="col">
-			<h4 class="text-left">All Levels</h4>
 			<div id="levelsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 			<div class="row" id="levels"></div>
 		</div>

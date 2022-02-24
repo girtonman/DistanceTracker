@@ -1,6 +1,8 @@
 ﻿using DistanceTracker.DALs;
 using DistanceTracker.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.Controllers
@@ -60,8 +62,22 @@ namespace DistanceTracker.Controllers
 		{
 			var dal = new LeaderboardDAL();
 			var levels = await dal.GetLevels();
+			var levelSetOrder = new Dictionary<string, int>()
+			{
+				{ "Ignition", 1},
+				{ "High Impact", 2},
+				{ "Brute Force", 3},
+				{ "Overdrive", 4},
+				{ "Nightmare Fuel", 5},
+				{ "Adventure", 6},
+				{ "Lost to Echoes", 7},
+				{ "Nexus", 8},
+				{ "Legacy", 9},
+			};
 
-			return new JsonResult(levels);
+			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x => levelSetOrder[x.First().LevelSet]);
+
+			return new JsonResult(groupedLevels);
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
