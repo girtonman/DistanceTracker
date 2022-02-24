@@ -20,12 +20,16 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetGlobalRecentActivity()
 		{
+			// Get data
 			var leDAL = new LeaderboardEntryDAL();
 			var lehDAL = new LeaderboardEntryHistoryDAL();
 			var recentFirstSightings = await leDAL.GetRecentFirstSightings(100);
 			var recentImprovements = await lehDAL.GetRecentImprovements(100);
 
+			// Prepare empty view model
 			var recentActivity = new List<Activity>();
+
+			// Add data to view model
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
 			{
 				TimeUTC = x.FirstSeenTimeUTC,
@@ -37,15 +41,17 @@ namespace DistanceTracker.Controllers
 				Improvement = x,
 			}));
 
-			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).ToList();
+			// Ordering
+			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).Take(100).ToList();
 
+			// Add avatars
 			foreach (var activity in recentActivity)
 			{
-				if(activity.Sighting != null)
+				if (activity.Sighting != null)
 				{
 					await activity.Sighting.Player.GetSteamAvatar();
 				}
-				else if(activity.Improvement != null)
+				else if (activity.Improvement != null)
 				{
 					await activity.Improvement.Player.GetSteamAvatar();
 				}
