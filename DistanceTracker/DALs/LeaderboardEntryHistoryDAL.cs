@@ -14,27 +14,59 @@ namespace DistanceTracker.DALs
 			Connection = new MySqlConnection(Settings.ConnectionString);
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null)
+		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null)
 		{
 			Connection.Open();
-			var sql = "SELECT leh.LeaderboardID, l.LevelName, leh.SteamID, p.Name, leh.FirstSeenTimeUTC, OldMilliseconds, NewMilliseconds, OldRank, NewRank, UpdatedTimeUTC, p.SteamAvatar FROM LeaderboardEntryHistory leh "
-				+ "LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID "
-				+ "LEFT JOIN Players p on p.SteamID = leh.SteamID ";
+			// Construct the base SELECT
+			var sql = @$"
+				SELECT
+					leh.LeaderboardID,
+					l.LevelName,
+					leh.SteamID,
+					p.Name,
+					leh.FirstSeenTimeUTC,
+					OldMilliseconds,
+					NewMilliseconds,
+					OldRank,
+					NewRank,
+					UpdatedTimeUTC,
+					p.SteamAvatar
+				FROM LeaderboardEntryHistory leh
+				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID
+				LEFT JOIN Players p on p.SteamID = leh.SteamID";
 
+			// Add conditions
+			var conditions = new List<string>();
 			if (steamID.HasValue)
 			{
-				sql += $"WHERE leh.SteamID = {steamID} ";
+				conditions.Add($"leh.SteamID = {steamID}");
 			}
-
 			if (leaderboardID.HasValue)
 			{
-				sql += $"WHERE leh.LeaderboardID = {leaderboardID} ";
+				conditions.Add($"leh.LeaderboardID = {leaderboardID}");
+			}
+			if(rankCutoff.HasValue)
+			{
+				conditions.Add($"leh.NewRank <= {rankCutoff}");
+			}
+			for(var i = 0; i < conditions.Count; i++)
+			{
+				if(i == 0)
+				{
+					sql += $" WHERE {conditions[i]}";
+				}
+				else
+				{
+					sql += $" AND {conditions[i]}";
+				}
 			}
 
-			sql += $"ORDER BY leh.ID DESC LIMIT {numRows}";
+			// Add ordering
+			sql += $" ORDER BY leh.ID DESC LIMIT {numRows}";
+
+			// Execute and handle result
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
-
 			var entries = new List<LeaderboardEntryHistory>();
 			while (reader.Read())
 			{
