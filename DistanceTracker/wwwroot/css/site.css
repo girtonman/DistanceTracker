@@ -300,6 +300,19 @@ table.small tbody tr td.entry-img img {
 	cursor: pointer;
 }
 
+/* ===== Scrollbar CSS ===== */
+*::-webkit-scrollbar {
+	width: 6px;
+}
+*::-webkit-scrollbar-track {
+	background: #222;
+}
+*::-webkit-scrollbar-thumb {
+	background-color: #c8c8c8;
+	border-radius: 0px;
+	border: 0px;
+}
+
 hr {
 	border-top: 1px solid #c8c8c8;
 }
