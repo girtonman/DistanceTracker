@@ -45,7 +45,14 @@
 			<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 				<div class="navbar-nav">
 					<a class="nav-item nav-link" href="/Leaderboard/Global">Leaderboard</a>
-					<a class="nav-item nav-link" href="/Home/GlobalActivity">Activity</a>
+					<div class="nav-item dropdown">
+						<a class="nav-link" data-toggle="dropdown" href="#" role="button">Activity</a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="/Home/GlobalActivity">Global Activity</a>
+							<a class="dropdown-item" href="/Home/WRActivity">Recent WRs</a>
+							<a class="dropdown-item" href="/Home/Top100Activity">Recent Top 100s</a>
+						</div>
+					</div>
 					<a class="nav-item nav-link" href="/Leaderboard/Levels">Levels</a>
 					<a class="nav-item nav-link" href="/Player/Compare">Compare</a>
 				</div>
