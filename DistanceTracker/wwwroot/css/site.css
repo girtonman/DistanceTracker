@@ -299,3 +299,7 @@ table.small tbody tr td.entry-img img {
 .pointer {
 	cursor: pointer;
 }
+
+hr {
+	border-top: 1px solid #c8c8c8;
+}
