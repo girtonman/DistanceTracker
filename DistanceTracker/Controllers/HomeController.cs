@@ -97,6 +97,43 @@ namespace DistanceTracker.Controllers
 			return new JsonResult(recentActivity);
 		}
 
+		public IActionResult Top100Activity() => View();
+
+		public async Task<IActionResult> GetTop100RecentActivity()
+		{
+			// Get data
+			var lehDAL = new LeaderboardEntryHistoryDAL();
+			var recentTop100 = await lehDAL.GetRecentImprovements(100, rankCutoff: 100);
+
+			// Prepare empty view model
+			var recentActivity = new List<Activity>();
+
+			// Add data to view model
+			recentTop100.ForEach(x => recentActivity.Add(new Activity()
+			{
+				TimeUTC = x.UpdatedTimeUTC,
+				Improvement = x,
+			}));
+
+			// Ordering
+			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).ToList();
+
+			// Add avatars
+			foreach (var activity in recentActivity)
+			{
+				if (activity.Sighting != null)
+				{
+					await activity.Sighting.Player.GetSteamAvatar();
+				}
+				else if (activity.Improvement != null)
+				{
+					await activity.Improvement.Player.GetSteamAvatar();
+				}
+			}
+
+			return new JsonResult(recentActivity);
+		}
+
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{
