@@ -76,6 +76,19 @@ namespace DistanceTracker.DALs
 			Connection.Close();
 		}
 
+		public async Task UpdateSteamName(ulong steamID, string steamName)
+		{
+			Connection.Open();
+
+			var sql = $"UPDATE Players SET Name = @steamName WHERE SteamID = {steamID}";
+
+			var command = new MySqlCommand(sql, Connection);
+			command.Parameters.AddWithValue("@steamName", steamName);
+			await command.ExecuteNonQueryAsync();
+
+			Connection.Close();
+		}
+
 		public async Task<FunStats> GetFunStats(ulong steamID)
 		{
 			Connection.Open();

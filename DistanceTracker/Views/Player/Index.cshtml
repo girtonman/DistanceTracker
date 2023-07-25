@@ -36,6 +36,7 @@
 		getLeaderboardRankings();
 		getRecentActivity();
 		getHistogramData();
+		
 		$('#toggleLeaderboardRankingSort').click(() => {
 			if (leaderboardSortingEnabled) {
 				leaderboardSortingEnabled = false;
@@ -56,6 +57,10 @@
 				// Sort and render
 				handleLeaderboardRankings();
 			}
+		});
+
+		$('#refreshSteamInfo').click(() => {
+			window.location = 'Player/RefreshSteamInfo?steamID=@Model.SteamID';
 		});
 	});
 
@@ -367,7 +372,7 @@
 						<a href="http://steamcommunity.com/profiles/@Model.SteamID" target="_blank">
 							<img href="" src="@await Model.GetSteamAvatar(steamDAL, playerDAL, "_full")" />
 						</a>
-						<h2>@Model.Name</h2>
+						<h2>@Model.Name <i title="Refresh Steam Profile Info" class="fas fa-sync fa-xxs pointer" id="refreshSteamInfo"></i></h2>
 						<hr />
 					</div>
 					<div class="col-lg-12 col-xl-6">

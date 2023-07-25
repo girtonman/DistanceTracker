@@ -9,18 +9,20 @@ namespace DistanceTracker.Controllers
 {
 	public class PlayerController : Controller
 	{
-		public PlayerController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, PlayerDAL playerDAL, LeaderboardDAL lDAL)
+		public PlayerController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, PlayerDAL playerDAL, LeaderboardDAL lDAL, SteamDAL steamDAL)
 		{
 			EntryDAL = leDAL;
 			HistoryDAL = lehDAL;
 			PlayerDAL = playerDAL;
 			LeaderDAL = lDAL;
+			SteamDAL = steamDAL;
 		}
 
 		public LeaderboardEntryDAL EntryDAL { get; }
 		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
 		public PlayerDAL PlayerDAL { get; }
 		public LeaderboardDAL LeaderDAL { get; }
+		public SteamDAL SteamDAL { get; }
 
 		public async Task<IActionResult> Index(ulong steamID)
 		{
@@ -166,6 +168,19 @@ namespace DistanceTracker.Controllers
 			}
 
 			return new JsonResult(histograms.GroupBy(x => x.Leaderboard.LevelSet).ToDictionary(x => x.Key, x => x.ToList()));
+		}
+
+		public async Task<IActionResult> RefreshSteamInfo(ulong steamID)
+		{
+			var players = await SteamDAL.GetPlayerSummaries(steamID);
+			var player = players.FirstOrDefault();
+			if(player != null)
+			{
+				await PlayerDAL.UpdateSteamAvatar(steamID, player.Avatar);
+				await PlayerDAL.UpdateSteamName(steamID, player.PersonaName);
+			}
+
+			return RedirectToAction("Index", new {steamID = steamID});
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -22,10 +22,6 @@ namespace DistanceTracker.DALs
 			var url = $"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={SteamAPIKey}&steamids={steamID}";
 			var wr = WebRequest.Create(url);
 
-			//var myProxy = new WebProxy("myproxy", 80);
-			//myProxy.BypassProxyOnLocal = true;
-			//wr.Proxy = WebProxy.GetDefaultProxy();
-
 			var response = await wr.GetResponseAsync();
 			var stream = response.GetResponseStream();
 			var reader = new StreamReader(stream);

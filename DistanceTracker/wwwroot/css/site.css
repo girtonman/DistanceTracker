@@ -356,3 +356,7 @@ hr {
 .nav-dark .navbar-text a:hover, .nav-dark .navbar-text a:focus {
 	color: #fff;
 }
+
+.fa-xxs {
+	font-size: 0.85rem;
+}
