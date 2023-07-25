@@ -316,3 +316,43 @@ table.small tbody tr td.entry-img img {
 hr {
 	border-top: 1px solid #c8c8c8;
 }
+
+.nav-dark .nav-link {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-dark .nav-link:hover, .nav-dark .nav-link:focus {
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.nav-dark .nav-link.disabled {
+	color: rgba(255, 255, 255, 0.25);
+}
+
+.nav-dark .show > .nav-link,
+.nav-dark .active > .nav-link,
+.nav-dark .nav-link.show,
+.nav-dark .nav-link.active {
+	color: #fff;
+}
+
+.nav-dark .navbar-toggler {
+	color: rgba(255, 255, 255, 0.5);
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-dark .navbar-toggler-icon {
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+.nav-dark .navbar-text {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-dark .navbar-text a {
+	color: #fff;
+}
+
+.nav-dark .navbar-text a:hover, .nav-dark .navbar-text a:focus {
+	color: #fff;
+}
