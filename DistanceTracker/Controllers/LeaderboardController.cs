@@ -25,7 +25,9 @@ namespace DistanceTracker.Controllers
 			var viewModel = new GlobalLeaderboardViewModel
 			{
 				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(),
-				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle()
+				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(),
+				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(),
+				WRLog = await HistoryDAL.GetWRLog(),
 			};
 
 			// Add global time improvements to the entries

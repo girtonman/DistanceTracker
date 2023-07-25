@@ -141,6 +141,46 @@
 					}
 				</tbody>
 			</table>
+
+			<h4 class="text-left">World Record Log</h4>
+			<table class="table table-striped table-dark">
+				<thead>
+					<tr>
+						<th class="text-left">Player</th>
+						<th class="text-left">Track</th>
+						<th>Time</th>
+						<th>When</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach(var entry in Model.WRLog)
+					{
+						<tr>
+							<td class="text-left entry-img no-wrap"><div class="fade-in">
+								<img src="@(Html.Raw(entry.Player.SteamAvatar))" />
+								<a class="link" href="/Player?steamID=@entry.Player.SteamID">
+									@entry.Player.Name
+								</a>
+							</div></td>
+							<td class="text-left entry-img no-wrap"><div class="fade-in">
+								<img src="/images/@(Html.Raw(entry.Leaderboard.LevelName)).bytes.png" />
+								<a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Leaderboard.ID">
+									@entry.Leaderboard.LevelName
+								</a>
+							</div></td>
+							<td class="no-wrap">
+								<div class="fade-in">
+									@entry.MillisecondsString
+									( <i class="fas fa-arrow-up fa-sm text-success"></i> @entry.TimeImprovement)
+								</div>
+							</td>
+							<td class="no-wrap">
+								<div class="fade-in">@entry.TimeAgoString</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
 		</div>
 	</div>
 </div>
