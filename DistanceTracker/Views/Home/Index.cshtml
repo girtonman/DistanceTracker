@@ -20,6 +20,11 @@
 			<div>for <span class="font-weight-bold">@Model.PlayerCount</span> players</div>
 			<div>across <span class="font-weight-bold">@Model.LeaderboardCount</span> leaderboards</div>
 			<div>and <span class="font-weight-bold">@Model.LeaderboardEntryCount</span> leaderboard entries</div>
+			<div>Last updated <span class="font-weight-bold">@Model.TimeAgoString</span></div>
+			@if((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Model.UpdatedTimeUTC > 3600000)
+			{
+				<div class="text-warning">The scraper might be dead. Ping <span class="font-weight-bold">@@noodle_beard</span> in <a class="font-weight-bold" href="https://discord.gg/distance">#tools</a> to fix it</div>
+			}
 		</div>
 	</div>
 </div>
