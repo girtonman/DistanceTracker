@@ -9,10 +9,24 @@ namespace DistanceTracker.Controllers
 {
 	public class HomeController : Controller
 	{
+		public HomeController(GeneralDAL generalDAL, LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, SteamDAL steamDAL, PlayerDAL playerDAL)
+		{
+			GeneralDAL = generalDAL;
+			EntryDAL = leDAL;
+			HistoryDAL = lehDAL;
+			SteamDAL = steamDAL;
+			PlayerDAL = playerDAL;
+		}
+
+		public GeneralDAL GeneralDAL { get; }
+		public LeaderboardEntryDAL EntryDAL { get; }
+		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
+		public SteamDAL SteamDAL { get; }
+		public PlayerDAL PlayerDAL { get; }
+
 		public async Task<IActionResult> IndexAsync()
 		{
-			var dal = new GeneralDAL();
-			var siteStats = await dal.GetSiteStats();
+			var siteStats = await GeneralDAL.GetSiteStats();
 			return View(siteStats);
 		}
 
@@ -21,10 +35,8 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetGlobalRecentActivity()
 		{
 			// Get data
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var recentFirstSightings = await leDAL.GetRecentFirstSightings(100);
-			var recentImprovements = await lehDAL.GetRecentImprovements(100);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(100);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(100);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -49,11 +61,11 @@ namespace DistanceTracker.Controllers
 			{
 				if (activity.Sighting != null)
 				{
-					await activity.Sighting.Player.GetSteamAvatar();
+					await activity.Sighting.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 				else if (activity.Improvement != null)
 				{
-					await activity.Improvement.Player.GetSteamAvatar();
+					await activity.Improvement.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 			}
 
@@ -65,8 +77,7 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetWRActivity()
 		{
 			// Get data
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var recentWRs = await lehDAL.GetRecentImprovements(100, rankCutoff: 1);
+			var recentWRs = await HistoryDAL.GetRecentImprovements(100, rankCutoff: 1);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -86,11 +97,11 @@ namespace DistanceTracker.Controllers
 			{
 				if (activity.Sighting != null)
 				{
-					await activity.Sighting.Player.GetSteamAvatar();
+					await activity.Sighting.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 				else if (activity.Improvement != null)
 				{
-					await activity.Improvement.Player.GetSteamAvatar();
+					await activity.Improvement.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 			}
 
@@ -102,8 +113,7 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetTop100RecentActivity()
 		{
 			// Get data
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var recentTop100 = await lehDAL.GetRecentImprovements(100, rankCutoff: 100);
+			var recentTop100 = await HistoryDAL.GetRecentImprovements(100, rankCutoff: 100);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -123,11 +133,11 @@ namespace DistanceTracker.Controllers
 			{
 				if (activity.Sighting != null)
 				{
-					await activity.Sighting.Player.GetSteamAvatar();
+					await activity.Sighting.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 				else if (activity.Improvement != null)
 				{
-					await activity.Improvement.Player.GetSteamAvatar();
+					await activity.Improvement.Player.GetSteamAvatar(SteamDAL, PlayerDAL);
 				}
 			}
 

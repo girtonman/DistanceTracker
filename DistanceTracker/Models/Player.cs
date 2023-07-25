@@ -11,7 +11,7 @@ namespace DistanceTracker
 		public string Name { get; set; }
 		public string SteamAvatar { get; set; }
 
-		public async Task<string> GetSteamAvatar(string suffix = null)
+		public async Task<string> GetSteamAvatar(SteamDAL steamDAL, PlayerDAL playerDAL, string suffix = null)
 		{
 			if (SteamAvatar == "Unknown")
 			{
@@ -20,9 +20,7 @@ namespace DistanceTracker
 
 			if (SteamAvatar == null)
 			{
-				var steamAPI = new SteamDAL();
-				var players = await steamAPI.GetPlayerSummaries(SteamID);
-				var pDAL = new PlayerDAL();
+				var players = await steamDAL.GetPlayerSummaries(SteamID);
 				var player = players.FirstOrDefault();
 				if(player == null)
 				{
@@ -31,7 +29,7 @@ namespace DistanceTracker
 				else
 				{
 					SteamAvatar = player.Avatar;
-					await pDAL.UpdateSteamAvatar(SteamID, SteamAvatar);
+					await playerDAL.UpdateSteamAvatar(SteamID, SteamAvatar);
 				}
 			}
 

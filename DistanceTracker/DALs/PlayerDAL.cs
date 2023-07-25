@@ -9,9 +9,9 @@ namespace DistanceTracker.DALs
 	{
 		private MySqlConnection Connection { get; set; }
 
-		public PlayerDAL()
+		public PlayerDAL(Settings settings)
 		{
-			Connection = new MySqlConnection(Settings.ConnectionString);
+			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
 		public async Task<Player> GetPlayer(ulong steamID)

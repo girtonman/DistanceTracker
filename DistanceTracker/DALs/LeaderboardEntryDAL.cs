@@ -10,9 +10,9 @@ namespace DistanceTracker.DALs
 	{
 		private MySqlConnection Connection { get; set; }
 
-		public LeaderboardEntryDAL()
+		public LeaderboardEntryDAL(Settings settings)
 		{
-			Connection = new MySqlConnection(Settings.ConnectionString);
+			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
 		public async Task<Dictionary<ulong, LeaderboardEntry>> GetLeaderboardEntries(int leaderboardID)

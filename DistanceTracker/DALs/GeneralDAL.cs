@@ -1,6 +1,5 @@
 ﻿using DistanceTracker.Models;
 using MySqlConnector;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.DALs
@@ -9,9 +8,9 @@ namespace DistanceTracker.DALs
 	{
 		private MySqlConnection Connection { get; set; }
 
-		public GeneralDAL()
+		public GeneralDAL(Settings settings)
 		{
-			Connection = new MySqlConnection(Settings.ConnectionString);
+			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
 		public async Task<SiteStats> GetSiteStats()

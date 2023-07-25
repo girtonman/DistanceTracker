@@ -8,6 +8,15 @@ namespace DistanceTracker.Controllers
 {
 	public class SearchController : Controller
 	{
+		public SearchController(PlayerDAL playerDAL, SteamDAL steamDAL)
+		{
+			PlayerDAL = playerDAL;
+			SteamDAL = steamDAL;
+		}
+
+		public PlayerDAL PlayerDAL { get; }
+		public SteamDAL SteamDAL { get; }
+
 		public IActionResult Index(string q) => View("Index", q);
 
 		public async Task<IActionResult> Players(string q)
@@ -17,11 +26,10 @@ namespace DistanceTracker.Controllers
 				return new JsonResult(new List<Player>());
 			}
 
-			var dal = new PlayerDAL();
-			var players = await dal.SearchByName(q);
+			var players = await PlayerDAL.SearchByName(q);
 			foreach (var player in players)
 			{
-				await player.GetSteamAvatar();
+				await player.GetSteamAvatar(SteamDAL, PlayerDAL);
 			}
 
 			return new JsonResult(players);

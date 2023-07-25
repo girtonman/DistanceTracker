@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DistanceTracker.DALs;
 using DistanceTracker.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
@@ -17,20 +17,16 @@ namespace DistanceTracker
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration, IWebHostEnvironment env)
+		public Startup(IWebHostEnvironment env)
 		{
-			Configuration = configuration;
 			Environment = env;
 		}
 
-		public IConfiguration Configuration { get; }
 		public IWebHostEnvironment Environment { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			Settings.ConnectionString = Configuration["ConnectionString"];
-			Settings.SteamAPIKey = Configuration["SteamAPIKey"];
 			if (Environment.EnvironmentName == Environments.Development)
 			{
 				services.AddControllersWithViews().AddRazorRuntimeCompilation();
@@ -41,6 +37,14 @@ namespace DistanceTracker
 				options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
 				options.SerializerSettings.Converters.Add(new NumberToStringConverter());
 			});
+
+			services.AddTransient<Settings>();
+			services.AddTransient<GeneralDAL>();
+			services.AddTransient<PlayerDAL>();
+			services.AddTransient<LeaderboardDAL>();
+			services.AddTransient<LeaderboardEntryDAL>();
+			services.AddTransient<LeaderboardEntryHistoryDAL>();
+			services.AddTransient<SteamDAL>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
