@@ -1,0 +1,68 @@
+﻿@{
+	ViewData["Title"] = "Oldest World Records";
+}
+
+<script>
+	jQuery(function () {
+		getOldestWRs();
+	});
+
+	function getOldestWRs() {
+		$.ajax({
+			url: '/Leaderboard/GetOldestWRs',
+			method: 'GET',
+			success: async function (data) {
+				$('#oldestWRsPlaceholder').hide();
+				var oldestWRs = $('#oldestWRs');
+				for (var i = 0; i < data.length; i++) {
+					var record = data[i];
+					var row = $(`
+						<tr>
+							<td class="text-left entry-img no-wrap"><div class="fade-in">
+								<img src="${record.player.steamAvatar}" />
+								<a class="link" href="/Player?steamID=${record.player.steamID}">
+									${record.player.name}
+								</a>
+							</div></td>
+							<td class="text-left entry-img no-wrap"><div class="fade-in">
+								<img src="/images/${record.leaderboard.levelName}.bytes.png" />
+								<a class="link" href="/Leaderboard/Level?leaderboardID=${record.leaderboard.id}">
+									${record.leaderboard.levelName}
+								</a>
+							</div></td>
+							<td class="no-wrap"><div class="fade-in">${record.millisecondsString}</div></td>
+							<td class="no-wrap"><div class="fade-in">${(record.updatedTimeUTC > 1620509613800 ? '' : 'More than ') + record.updatedTimeAgoString}</div></td>
+						</tr>
+					`);
+					oldestWRs.append(row);
+					await new Promise(r => setTimeout(r, 15));
+				}
+			},
+			error: function () {
+				toastr.error('Failed to load longest standing world records');
+			}
+		});
+	};
+</script>
+
+<div class="container text-center">
+	<div class="row">
+		<div class="col">
+			<h4 class="text-left">Longest Standing World Records</h4>
+			<table class="table table-striped table-dark" style="table-layout: fixed">
+				<thead>
+					<tr>
+						<th class="text-left">Player</th>
+						<th class="text-left">Track</th>
+						<th style="width: 200px">Time</th>
+						<th style="width: 200px">When</th>
+					</tr>
+				</thead>
+				<tbody id="oldestWRs">
+				</tbody>
+			</table>
+			<div id="oldestWRsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+		</div>
+	</div>
+
+</div>

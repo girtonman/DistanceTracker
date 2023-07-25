@@ -507,5 +507,49 @@ namespace DistanceTracker.DALs
 
 			return percentileRanks;
 		}
+
+		public async Task<List<LeaderboardEntry>> GetOldestWRs(int numRows = 120)
+		{
+			Connection.Open();
+			var sql = @$"
+				SELECT le.LeaderboardID, l.LevelName, le.Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar
+				FROM (SELECT LeaderboardID, MIN(Milliseconds) AS Milliseconds FROM LeaderboardEntries GROUP BY LeaderboardID) WR
+				LEFT JOIN LeaderboardEntries le ON WR.LeaderboardID = le.LeaderboardID AND WR.Milliseconds = le.Milliseconds
+				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID
+				LEFT JOIN Players p on p.SteamID = le.SteamID
+				ORDER BY le.UpdatedTimeUTC ASC";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var leaderboardEntries = new List<LeaderboardEntry>();
+			while (reader.Read())
+			{
+				var le = new LeaderboardEntry()
+				{
+					LeaderboardID = reader.GetUInt32(0),
+					Milliseconds = reader.GetUInt64(2),
+					SteamID = reader.GetUInt64(3),
+					FirstSeenTimeUTC = reader.GetUInt64(5),
+					UpdatedTimeUTC = reader.GetUInt64(6),
+				};
+				le.Leaderboard = new Leaderboard()
+				{
+					ID = le.LeaderboardID,
+					LevelName = reader.GetString(1),
+				};
+				le.Player = new Player()
+				{
+					SteamID = le.SteamID,
+					Name = reader.GetString(4),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
+				};
+				leaderboardEntries.Add(le);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return leaderboardEntries;
+		}
 	}
 }

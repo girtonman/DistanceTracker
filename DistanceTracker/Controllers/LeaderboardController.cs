@@ -92,5 +92,12 @@ namespace DistanceTracker.Controllers
 		{
 			return base.View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
+
+		public IActionResult Oldest() => View();
+
+		public async Task<IActionResult> GetOldestWRs()
+		{
+			return new JsonResult(await EntryDAL.GetOldestWRs());
+		}
 	}
 }
