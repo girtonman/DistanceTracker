@@ -3,17 +3,24 @@
 }
 
 <script>
+	var lastUpdateTimeUTC = null;
+
 	jQuery(function () {
 		getGlobalRecentActivity();
 	});
 
 	function getGlobalRecentActivity() {
+		console.log(`fetching activity with timestamp ${lastUpdateTimeUTC}`);
 		$.ajax({
 			url: '/Home/GetGlobalRecentActivity',
 			method: 'GET',
+			data: {after: lastUpdateTimeUTC},
 			success: async function (data) {
+				// setup
 				$('#recentActivityPlaceholder').hide();
 				var recentActivity = $('#recentActivity');
+
+				// handle the response
 				for (var i = 0; i < data.length; i++) {
 					var activity = data[i];
 					if (activity.sighting != null) {
@@ -62,12 +69,29 @@
 							</tr>
 						`);
 					}
-					recentActivity.append(row);
+
+					if (lastUpdateTimeUTC == null) {
+						// add the new rows like it's a new page (top to bottom)
+						recentActivity.append(row);
+					}
+					else {
+						// add the new entries from the live update loop and remove an equal amount from the end
+						recentActivity.prepend(row);
+						recentActivity.children().last().remove();
+					}
 					await new Promise(r => setTimeout(r, 15));
+				}
+				
+				// remember what the most recent time was for subsequent calls
+				if (data.length > 0) {
+					lastUpdateTimeUTC = data[0].timeUTC;
 				}
 			},
 			error: function () {
-				toastr.error('Failed to load global stats for this player');
+				toastr.error('Failed to load global activity');
+			},
+			complete: function () {
+				setTimeout(getGlobalRecentActivity, 10000);
 			}
 		});
 	};

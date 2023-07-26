@@ -14,7 +14,7 @@ namespace DistanceTracker.DALs
 			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null)
+		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null, ulong? after = null)
 		{
 			Connection.Open();
 			// Construct the base SELECT
@@ -48,6 +48,10 @@ namespace DistanceTracker.DALs
 			if(rankCutoff.HasValue)
 			{
 				conditions.Add($"leh.NewRank <= {rankCutoff}");
+			}
+			if(after.HasValue)
+			{
+				conditions.Add($"leh.UpdatedTimeUTC > {after}");
 			}
 			for(var i = 0; i < conditions.Count; i++)
 			{

@@ -32,11 +32,11 @@ namespace DistanceTracker.Controllers
 
 		public IActionResult GlobalActivity() => View();
 
-		public async Task<IActionResult> GetGlobalRecentActivity()
+		public async Task<IActionResult> GetGlobalRecentActivity(ulong? after = null)
 		{
 			// Get data
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(100);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(100);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(100, after:after);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(100, after:after);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();

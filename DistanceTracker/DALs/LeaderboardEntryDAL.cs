@@ -42,7 +42,7 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null)
+		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, ulong? after = null)
 		{
 			Connection.Open();
 			var sql = @$"
@@ -58,6 +58,11 @@ namespace DistanceTracker.DALs
 			if (leaderboardID.HasValue)
 			{
 				sql += $"WHERE le.LeaderboardID = {leaderboardID} ";
+			}
+			
+			if (after.HasValue)
+			{
+				sql += $"WHERE le.UpdatedTimeUTC > {after} ";
 			}
 
 			sql += $"ORDER BY le.ID DESC "
