@@ -1,6 +1,9 @@
-﻿@using DistanceTracker.Models
+﻿@using DistanceTracker.Models;
 @using DistanceTracker.Utils;
-@model LeaderboardViewModel
+@using DistanceTracker.DALs;
+@inject PlayerDAL playerDAL;
+@inject SteamDAL steamDAL;
+@model LeaderboardViewModel;
 
 @{
 	ViewData["Title"] = Model.Leaderboard.LevelName;
@@ -41,7 +44,7 @@ $('#pills-tab a').on('click', function (e) {
 		</div>
 		<div class="col-3">
 			<h5 class="stroke">Leader</h5>
-			<h2 class="stroke"><img src="@await BestEntry.Player.GetSteamAvatar("_medium")" /> @BestEntry.Player.Name</h2>
+			<h2 class="stroke"><img src="@await BestEntry.Player.GetSteamAvatar(steamDAL, playerDAL, "_medium")" /> @BestEntry.Player.Name</h2>
 		</div>
 		<div class="col-3">
 			<h5 class="stroke">Record Age</h5>
@@ -115,7 +118,7 @@ $('#pills-tab a').on('click', function (e) {
 								{
 									<tr>
 										<td class="text-left entry-img">
-											<img src="@await entry.Player.GetSteamAvatar()" />
+											<img src="@await entry.Player.GetSteamAvatar(steamDAL, playerDAL)" />
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
 										<td class="text-left">@entry.NewRank ( <i class="fas fa-arrow-up fa-sm text-success"></i> @(entry.OldRank - entry.NewRank) )</td>
@@ -142,7 +145,7 @@ $('#pills-tab a').on('click', function (e) {
 								{
 									<tr>
 										<td class="text-left entry-img">
-											<img src="@await entry.Player.GetSteamAvatar()" />
+											<img src="@await entry.Player.GetSteamAvatar(steamDAL, playerDAL)" />
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
 										<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
@@ -181,7 +184,7 @@ $('#pills-tab a').on('click', function (e) {
 									@entry.Rank
 								</td>
 								<td class="text-left entry-img">
-									<img src="@await entry.Player.GetSteamAvatar()" />
+									<img src="@await entry.Player.GetSteamAvatar(steamDAL, playerDAL)" />
 									<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 								</td>
 								<td>@entry.NoodlePoints.ToString("0")</td>

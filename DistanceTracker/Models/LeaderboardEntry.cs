@@ -17,5 +17,6 @@
 		public ulong UpdatedTimeUTC { get; set; }
 		public Leaderboard Leaderboard { get; set; }
 		public Player Player { get; set; }
+		public string UpdatedTimeAgoString { get => Formatter.TimeAgoFromUnixTime(UpdatedTimeUTC); }
 	}
 }

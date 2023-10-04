@@ -9,12 +9,12 @@ namespace DistanceTracker.DALs
 	{
 		private MySqlConnection Connection { get; set; }
 
-		public LeaderboardEntryHistoryDAL()
+		public LeaderboardEntryHistoryDAL(Settings settings)
 		{
-			Connection = new MySqlConnection(Settings.ConnectionString);
+			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null)
+		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null, ulong? after = null)
 		{
 			Connection.Open();
 			// Construct the base SELECT
@@ -48,6 +48,10 @@ namespace DistanceTracker.DALs
 			if(rankCutoff.HasValue)
 			{
 				conditions.Add($"leh.NewRank <= {rankCutoff}");
+			}
+			if(after.HasValue)
+			{
+				conditions.Add($"leh.UpdatedTimeUTC > {after}");
 			}
 			for(var i = 0; i < conditions.Count; i++)
 			{
@@ -182,6 +186,64 @@ namespace DistanceTracker.DALs
 			Connection.Close();
 
 			return globalTimeImprovements;
+		}
+
+		public async Task<List<LeaderboardEntryHistory>> GetWRLog(int limit = 20)
+		{
+			Connection.Open();
+			var sql = @$"SELECT 
+				leh.LeaderboardID,
+				l.LevelName,
+				leh.SteamID,
+				p.Name,
+				leh.FirstSeenTimeUTC,
+				OldMilliseconds,
+				NewMilliseconds,
+				OldRank,
+				NewRank,
+				UpdatedTimeUTC,
+				p.SteamAvatar
+			FROM LeaderboardEntryHistory leh 
+			LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
+			LEFT JOIN Players p on p.SteamID = leh.SteamID 
+			WHERE NewRank = 1
+			ORDER BY leh.UpdatedTimeUTC DESC
+			LIMIT {limit}";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var entries = new List<LeaderboardEntryHistory>();
+			while (reader.Read())
+			{
+				var leh = new LeaderboardEntryHistory()
+				{
+					LeaderboardID = reader.GetUInt32(0),
+					SteamID = reader.GetUInt64(2),
+					FirstSeenTimeUTC = reader.GetUInt64(4),
+					OldMilliseconds = reader.GetUInt64(5),
+					NewMilliseconds = reader.GetUInt64(6),
+					OldRank = reader.GetUInt32(7),
+					NewRank = reader.GetUInt32(8),
+					UpdatedTimeUTC = reader.GetUInt64(9),
+				};
+				leh.Leaderboard = new Leaderboard()
+				{
+					ID = leh.LeaderboardID,
+					LevelName = reader.GetString(1),
+				};
+				leh.Player = new Player()
+				{
+					SteamID = leh.SteamID,
+					Name = reader.GetString(3),
+					SteamAvatar = reader.IsDBNull(10) ? null : reader.GetString(10),
+				};
+				entries.Add(leh);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return entries;
 		}
 	}
 }

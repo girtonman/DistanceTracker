@@ -9,20 +9,29 @@ namespace DistanceTracker.Controllers
 {
 	public class LeaderboardController : Controller
 	{
+		public LeaderboardController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, LeaderboardDAL lDAL)
+		{
+			EntryDAL = leDAL;
+			HistoryDAL = lehDAL;
+			LeaderDAL = lDAL;
+		}
+
+		public LeaderboardEntryDAL EntryDAL { get; }
+		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
+		public LeaderboardDAL LeaderDAL { get; }
+
 		public async Task<IActionResult> Global()
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-
 			var viewModel = new GlobalLeaderboardViewModel
 			{
-				LeaderboardEntries = await leDAL.GetGlobalLeaderboard(),
-				WinnersCircle = await leDAL.GetGlobalWinnersCircle(),
-				OptimalTotalTime = await leDAL.GetOptimalTotalTime(),
+				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(),
+				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(),
+				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(),
+				WRLog = await HistoryDAL.GetWRLog(),
 			};
 
 			// Add global time improvements to the entries
-			var globalTimeImprovements = await lehDAL.GetGlobalPastWeeksImprovement();
+			var globalTimeImprovements = await HistoryDAL.GetGlobalPastWeeksImprovement();
 			foreach(var entry in viewModel.LeaderboardEntries)
 			{
 				var steamID = entry.Player.SteamID;
@@ -32,18 +41,17 @@ namespace DistanceTracker.Controllers
 				}
 			}
 
+			//var mostImprovedTime = 
+
 			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Level(uint leaderboardID)
 		{
-			var lDAL = new LeaderboardDAL();
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var leaderboardEntries = await leDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
-			var recentNewSightings = await leDAL.GetRecentFirstSightings(30, null, leaderboardID);
-			var recentImprovements = await lehDAL.GetRecentImprovements(30, null, leaderboardID);
-			var leaderboard = await lDAL.GetLeaderboard(leaderboardID);
+			var leaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
+			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(30, null, leaderboardID);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(30, null, leaderboardID);
+			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
 
 			var viewModel = new LeaderboardViewModel()
 			{
@@ -60,8 +68,7 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetLevels()
 		{
-			var dal = new LeaderboardDAL();
-			var levels = await dal.GetLevels();
+			var levels = await LeaderDAL.GetLevels();
 			var levelSetOrder = new Dictionary<string, int>()
 			{
 				{ "Ignition", 1},
@@ -84,6 +91,13 @@ namespace DistanceTracker.Controllers
 		public IActionResult Error()
 		{
 			return base.View(new ErrorViewModel { RequestId = System.Diagnostics.Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+		}
+
+		public IActionResult Oldest() => View();
+
+		public async Task<IActionResult> GetOldestWRs()
+		{
+			return new JsonResult(await EntryDAL.GetOldestWRs());
 		}
 	}
 }

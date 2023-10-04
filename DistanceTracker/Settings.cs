@@ -1,8 +1,17 @@
-﻿namespace DistanceTracker
+﻿using Microsoft.Extensions.Configuration;
+
+namespace DistanceTracker
 {
 	public class Settings
 	{
-		public static string ConnectionString { get; set; }
-		public static string SteamAPIKey { get; set; }
+		public Settings(IConfiguration configuration)
+		{
+			Configuration = configuration;
+		}
+
+		public IConfiguration Configuration { get; }
+
+		public string ConnectionString { get => Configuration["ConnectionString"]; }
+		public string SteamAPIKey { get => Configuration["SteamAPIKey"]; }
 	}
 }

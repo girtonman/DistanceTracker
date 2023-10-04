@@ -9,26 +9,36 @@ namespace DistanceTracker.Controllers
 {
 	public class PlayerController : Controller
 	{
+		public PlayerController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, PlayerDAL playerDAL, LeaderboardDAL lDAL, SteamDAL steamDAL)
+		{
+			EntryDAL = leDAL;
+			HistoryDAL = lehDAL;
+			PlayerDAL = playerDAL;
+			LeaderDAL = lDAL;
+			SteamDAL = steamDAL;
+		}
+
+		public LeaderboardEntryDAL EntryDAL { get; }
+		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
+		public PlayerDAL PlayerDAL { get; }
+		public LeaderboardDAL LeaderDAL { get; }
+		public SteamDAL SteamDAL { get; }
+
 		public async Task<IActionResult> Index(ulong steamID)
 		{
-			var dal = new PlayerDAL();
-			var player = await dal.GetPlayer(steamID);
+			var player = await PlayerDAL.GetPlayer(steamID);
 
 			return View(player);
 		}
 
 		public async Task<IActionResult> GetGlobalStats(ulong steamID)
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var pDAL = new PlayerDAL();
+			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID);
 
-			var globalRanking = await leDAL.GetGlobalRankingForPlayer(steamID);
-
-			var lastWeeksImprovements = await lehDAL.GetPastWeeksImprovements(steamID);
+			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID);
 			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
-			var oldGlobalRank = await leDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
-			var funStats = await pDAL.GetFunStats(steamID);
+			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
+			var funStats = await PlayerDAL.GetFunStats(steamID);
 
 			var stats = new PlayerGlobalStats
 			{
@@ -44,8 +54,7 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetLeaderboardRankings(ulong steamID)
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var rankedLeaderboardEntries = await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID);
+			var rankedLeaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForPlayer(steamID);
 			rankedLeaderboardEntries = rankedLeaderboardEntries
 				.OrderBy(x => x.Rank)
 				.ToList();
@@ -55,10 +64,8 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetRecentActivity(ulong steamID)
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var lehDAL = new LeaderboardEntryHistoryDAL();
-			var recentFirstSightings = await leDAL.GetRecentFirstSightings(30, steamID);
-			var recentImprovements = await lehDAL.GetRecentImprovements(30, steamID);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(40, steamID);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(40, steamID);
 
 			var recentActivity = new List<Activity>();
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
@@ -73,6 +80,7 @@ namespace DistanceTracker.Controllers
 			}));
 
 			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).Take(30).ToList();
+			recentActivity = recentActivity.OrderByDescending(x => x.TimeUTC).Take(40).ToList();
 
 			return new JsonResult(recentActivity);
 		}
@@ -84,10 +92,7 @@ namespace DistanceTracker.Controllers
 				return View(null);
 			}
 
-			var leDAL = new LeaderboardEntryDAL();
-			var lDAL = new LeaderboardDAL();
-			var pDAL = new PlayerDAL();
-			var leaderboards = await lDAL.GetAllLeaderboards();
+			var leaderboards = await LeaderDAL.GetAllLeaderboards();
 
 			// Make sure the list of steam IDs is unique
 			var steamIDList = steamIDs.Split(",").Select(x => ulong.Parse(x)).ToList();
@@ -97,8 +102,8 @@ namespace DistanceTracker.Controllers
 
 			foreach (var steamID in steamIDList)
 			{
-				entriesList.Add(steamID, await leDAL.GetRankedLeaderboardEntriesForPlayer(steamID));
-				players.Add(await pDAL.GetPlayer(steamID));
+				entriesList.Add(steamID, await EntryDAL.GetRankedLeaderboardEntriesForPlayer(steamID));
+				players.Add(await PlayerDAL.GetPlayer(steamID));
 			}
 
 			var viewModel = new PlayerComparisonViewModel()
@@ -126,9 +131,8 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetHistogramData(ulong steamID)
 		{
-			var leDAL = new LeaderboardEntryDAL();
-			var percentileRanks = await leDAL.GetPercentileRanks(steamID);
-			var groupedHistogramDataPoints = await leDAL.GetHistogramDataPoints();
+			var percentileRanks = await EntryDAL.GetPercentileRanks(steamID);
+			var groupedHistogramDataPoints = await EntryDAL.GetHistogramDataPoints();
 
 			var histograms = new List<HistogramViewModel>();
 			foreach (var percentileRank in percentileRanks)
@@ -164,6 +168,19 @@ namespace DistanceTracker.Controllers
 			}
 
 			return new JsonResult(histograms.GroupBy(x => x.Leaderboard.LevelSet).ToDictionary(x => x.Key, x => x.ToList()));
+		}
+
+		public async Task<IActionResult> RefreshSteamInfo(ulong steamID)
+		{
+			var players = await SteamDAL.GetPlayerSummaries(steamID);
+			var player = players.FirstOrDefault();
+			if(player != null)
+			{
+				await PlayerDAL.UpdateSteamAvatar(steamID, player.Avatar);
+				await PlayerDAL.UpdateSteamName(steamID, player.PersonaName);
+			}
+
+			return RedirectToAction("Index", new {steamID = steamID});
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

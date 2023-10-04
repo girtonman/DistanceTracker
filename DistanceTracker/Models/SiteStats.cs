@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DistanceTracker.Models
+﻿namespace DistanceTracker.Models
 {
 	public class SiteStats
 	{
@@ -11,5 +6,13 @@ namespace DistanceTracker.Models
 		public int LeaderboardEntryCount { get; set; }
 		public int ImprovementCount { get; set; }
 		public int LeaderboardCount { get; set; }
+		public ulong UpdatedTimeUTC { get; set; }
+		public string TimeAgoString
+		{
+			get
+			{
+				return Formatter.TimeAgoFromUnixTime(UpdatedTimeUTC);
+			}
+		}
 	}
 }

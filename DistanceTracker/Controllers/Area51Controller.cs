@@ -9,6 +9,13 @@ namespace DistanceTracker.Controllers
 {
 	public class Area51Controller : Controller
 	{
+		public Area51Controller(SteamDAL steamDAL)
+		{
+			SteamDAL = steamDAL;
+		}
+
+		public SteamDAL SteamDAL { get; }
+
 		public IActionResult Index()
 		{
 			return View();
@@ -20,8 +27,7 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> SteamAPITest(ulong steamID)
 		{
-			var api = new SteamDAL();
-			var players = await api.GetPlayerSummaries(steamID);
+			var players = await SteamDAL.GetPlayerSummaries(steamID);
 
 			return View(players.FirstOrDefault());
 		}

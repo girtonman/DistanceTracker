@@ -9,9 +9,9 @@ namespace DistanceTracker.DALs
 	{
 		private MySqlConnection Connection { get; set; }
 
-		public PlayerDAL()
+		public PlayerDAL(Settings settings)
 		{
-			Connection = new MySqlConnection(Settings.ConnectionString);
+			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
 		public async Task<Player> GetPlayer(ulong steamID)
@@ -71,6 +71,19 @@ namespace DistanceTracker.DALs
 
 			var command = new MySqlCommand(sql, Connection);
 			command.Parameters.AddWithValue("@steamAvatar", steamAvatar);
+			await command.ExecuteNonQueryAsync();
+
+			Connection.Close();
+		}
+
+		public async Task UpdateSteamName(ulong steamID, string steamName)
+		{
+			Connection.Open();
+
+			var sql = $"UPDATE Players SET Name = @steamName WHERE SteamID = {steamID}";
+
+			var command = new MySqlCommand(sql, Connection);
+			command.Parameters.AddWithValue("@steamName", steamName);
 			await command.ExecuteNonQueryAsync();
 
 			Connection.Close();
