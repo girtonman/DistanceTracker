@@ -123,6 +123,7 @@ namespace DistanceTracker.DALs
 							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 						FROM(
 								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS `Rank` FROM LeaderboardEntries
+								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
 						) ranks
 					) le
 					GROUP BY SteamID
@@ -204,6 +205,7 @@ namespace DistanceTracker.DALs
 							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 						FROM(
 								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
+								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
 						) ranks
 					) le
 					GROUP BY SteamID
@@ -247,6 +249,7 @@ namespace DistanceTracker.DALs
 							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 						FROM(
 								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
+								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
 						) ranks
 					) le
 					GROUP BY SteamID
@@ -402,6 +405,7 @@ namespace DistanceTracker.DALs
 							LeaderboardID,
 							MIN(Milliseconds) MinTime
 						FROM LeaderboardEntries
+						WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
 						GROUP BY LeaderboardID
 					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
 					GROUP BY SteamID
