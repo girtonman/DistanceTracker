@@ -62,7 +62,7 @@ namespace DistanceTracker.DALs
 			
 			if (after.HasValue)
 			{
-				sql += $"WHERE le.UpdatedTimeUTC > {after} ";
+				sql += $"WHERE le.FirstSeenTimeUTC > {after} ";
 			}
 
 			sql += $"ORDER BY le.ID DESC "
