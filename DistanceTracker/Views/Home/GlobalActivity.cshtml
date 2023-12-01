@@ -40,7 +40,7 @@
 								</div></td>
 								<td class="no-wrap"><div class="fade-in">${/*TODO*/''}</div></td>
 								<td class="no-wrap"><div class="fade-in">${activity.sighting.millisecondsString} <span class="text-success">New!</span></div></td>
-								<td class="no-wrap"><div class="fade-in">${activity.timeAgoString}</div></td>
+								<td class="no-wrap"><div class="fade-in livestamp" data-livestamp="${activity.timeUTC / 1000}"></div></td>
 							</tr>
 						`);
 					}
@@ -65,7 +65,7 @@
 								<td class="no-wrap"><div class="fade-in">
 									${activity.improvement.millisecondsString}
 									( <i class="fas fa-arrow-up fa-sm text-success"></i> ${activity.improvement.timeImprovement} )</div></td>
-								<td class="no-wrap"><div class="fade-in">${activity.timeAgoString}</div></td>
+								<td class="no-wrap"><div class="fade-in livestamp" data-livestamp="${activity.timeUTC / 1000}"></div></td>
 							</tr>
 						`);
 					}
@@ -85,6 +85,13 @@
 				// remember what the most recent time was for subsequent calls
 				if (data.length > 0) {
 					lastUpdateTimeUTC = data[0].timeUTC;
+					
+					$('.livestamp').on('change.livestamp', function(event, from, to) {
+						event.preventDefault(); // Stop the text from changing automatically
+						$(this).fadeOut(function() {
+							$(this).html(to).fadeIn();
+						});
+					});
 				}
 			},
 			error: function () {
