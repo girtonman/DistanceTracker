@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using DistanceTracker.Models;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

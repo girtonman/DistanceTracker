@@ -1,4 +1,4 @@
-﻿namespace DistanceTracker
+﻿namespace DistanceTracker.Models
 {
 	public class Leaderboard
 	{
