@@ -82,7 +82,11 @@ namespace DistanceTracker.Controllers
 				{ "Legacy", 9},
 			};
 
-			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x => levelSetOrder[x.First().LevelSet]);
+			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x => {
+				var levelSet = x.First().LevelSet;
+				return levelSetOrder.ContainsKey(levelSet) ? levelSetOrder[levelSet] : 99999;
+			})
+			.ThenBy(x => x.First().LevelSet);
 
 			return new JsonResult(groupedLevels);
 		}
