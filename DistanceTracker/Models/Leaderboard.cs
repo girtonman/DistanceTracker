@@ -7,5 +7,6 @@
 		public string LeaderboardName { get; set; }
 		public string LevelSet { get; set; }
 		public bool IsOfficial { get; set; }
+		public MapMedalTimes MedalTimes { get; set; }
 	}
 }

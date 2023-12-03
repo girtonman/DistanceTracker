@@ -11,7 +11,6 @@
 	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank != 1);
 	var HeaderHeightPX = 400;
 	var TabHeightPX = 20;
-	var medalTimes = OfficialMapMedalTimes.Maps[Model.Leaderboard.ID];
 }
 
 <style>
@@ -80,25 +79,25 @@ $('#pills-tab a').on('click', function (e) {
 							<div class="medal-diamond medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.DiamondTime)</h2>
+							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
 						</div>
 						<div class="col-5 level-medal-times box-shadow">
 							<div class="medal-gold medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.GoldTime)</h2>
+							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.GoldTime)</h2>
 						</div>
 						<div class="col-5 level-medal-times box-shadow">
 							<div class="medal-silver medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.SilverTime)</h2>
+							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.SilverTime)</h2>
 						</div>
 						<div class="col-5 level-medal-times box-shadow">
 							<div class="medal-bronze medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(medalTimes.BronzeTime)</h2>
+							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
 						</div>
 					</div>
 				</div>
@@ -178,7 +177,7 @@ $('#pills-tab a').on('click', function (e) {
 							<tr>
 								<td class="text-left" width="90">
 									@* TODO use the appropriate medal based on time *@
-									<div class="@medalTimes.GetMedalCSS(entry.Milliseconds) medal-small">
+									<div class="@Model.Leaderboard.MedalTimes.GetMedalCSS(entry.Milliseconds) medal-small">
 										<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 									</div>
 									@entry.Rank
