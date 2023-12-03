@@ -17,19 +17,25 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards WHERE ID = {leaderboardID}";
+			var sql = $"SELECT ID, LevelName, LeaderboardName, IsOfficial, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
 			Leaderboard leaderboard = null;
 			while (reader.Read())
 			{
+				var bronzeTime = reader.IsDBNull(4) ? 0 : reader.GetUInt32(4);
+				var silverTime = reader.IsDBNull(5) ? 0 : reader.GetUInt32(5);
+				var goldTime = reader.IsDBNull(6) ? 0 : reader.GetUInt32(6);
+				var diamondTime = reader.IsDBNull(7) ? 0 : reader.GetUInt32(7);
+
 				leaderboard = new Leaderboard()
 				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
+					MedalTimes = new MapMedalTimes(bronzeTime, silverTime, goldTime, diamondTime),
 				};
 			}
 
@@ -125,6 +131,18 @@ namespace DistanceTracker.DALs
 			Connection.Close();
 
 			return levels;
+		}
+
+		public async Task UpdateLevelTimes(uint leaderboardID, ulong bronzeTime, ulong silverTime, ulong goldTime, ulong diamondTime)
+		{
+			Connection.Open();
+
+			var sql = $"UPDATE Leaderboards SET BronzeMedalTime = {bronzeTime}, SilverMedalTime = {silverTime}, GoldMedalTime = {goldTime}, DiamondMedalTime = {diamondTime} WHERE ID = {leaderboardID}";
+
+			var command = new MySqlCommand(sql, Connection);
+			await command.ExecuteNonQueryAsync();
+
+			Connection.Close();
 		}
 	}
 }
