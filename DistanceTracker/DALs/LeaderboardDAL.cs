@@ -126,5 +126,17 @@ namespace DistanceTracker.DALs
 
 			return levels;
 		}
+
+		public async Task UpdateLevelTimes(uint leaderboardID, ulong bronzeTime, ulong silverTime, ulong goldTime, ulong diamondTime)
+		{
+			Connection.Open();
+
+			var sql = $"UPDATE Leaderboards SET BronzeMedalTime = {bronzeTime}, SilverMedalTime = {silverTime}, GoldMedalTime = {goldTime}, DiamondMedalTime = {diamondTime} WHERE ID = {leaderboardID}";
+
+			var command = new MySqlCommand(sql, Connection);
+			await command.ExecuteNonQueryAsync();
+
+			Connection.Close();
+		}
 	}
 }
