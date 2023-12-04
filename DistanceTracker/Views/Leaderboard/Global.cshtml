@@ -163,7 +163,7 @@
 								</a>
 							</div></td>
 							<td class="text-left entry-img no-wrap"><div class="fade-in">
-								<img src="/images/@(Html.Raw(entry.Leaderboard.LevelName)).bytes.png" />
+								<img src="@(Html.Raw(entry.Leaderboard.ImageURL))" />
 								<a class="link" href="/Leaderboard/Level?leaderboardID=@entry.Leaderboard.ID">
 									@entry.Leaderboard.LevelName
 								</a>

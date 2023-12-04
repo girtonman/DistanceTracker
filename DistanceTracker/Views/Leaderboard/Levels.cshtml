@@ -36,7 +36,7 @@
 							<div class="col-3 level-card fade-in">
 								<a class="link" href="/Leaderboard/Level?leaderboardid=${level.id}">
 									<div class="card box-shadow" style="margin: 15px 0px 15px 0px;">
-										<img class="card-img-top" src="/images/${level.levelName}.bytes.png">
+										<img class="card-img-top" src="${level.imageURL}">
 										<div class="card-body">
 											<h5 class="card-title">${level.levelName}</h5>
 											${level.entryCount == null ? '' : `<h6 class="card-subtitle mb-2">${level.entryCount} Entries</h6>`}

@@ -149,7 +149,7 @@
 			var row = $(`
 			<tr>
 				<td class="text-left entry-img no-wrap"><div class="fade-in">
-					<img class="card-img-top" src="/images/${rankedEntry.leaderboard.levelName}.bytes.png">
+					<img class="card-img-top" src="${rankedEntry.leaderboard.imageURL}">
 				</div></td>
 				<td class="text-left"><div class="fade-in">
 					<a class="link" href="/Leaderboard/Level?leaderboardID=${rankedEntry.leaderboard.id}">
@@ -184,7 +184,7 @@
 						var row = $(`
 							<tr>
 								<td class="text-left entry-img no-wrap"><div class="fade-in">
-									<img class="card-img-top" src="/images/${activity.sighting.leaderboard.levelName}.bytes.png">
+									<img class="card-img-top" src="${activity.sighting.leaderboard.imageURL}">
 								</div></td>
 								<td class="text-left"><div class="fade-in">
 									<a class="link" href="/Leaderboard/Level?leaderboardID=${activity.sighting.leaderboard.id}">
@@ -201,7 +201,7 @@
 						var row = $(`
 							<tr>
 								<td class="text-left entry-img no-wrap"><div class="fade-in">
-									<img class="card-img-top" src="/images/${activity.improvement.leaderboard.levelName}.bytes.png">
+									<img class="card-img-top" src="${activity.improvement.leaderboard.imageURL}">
 								</div></td>
 								<td class="text-left"><div class="fade-in">
 									<a class="link" href="/Leaderboard/Level?leaderboardID=${activity.improvement.leaderboard.id}">
@@ -292,7 +292,7 @@
 						// Create the chart for each level
 						const ctx = document.getElementById(`histogram-${levelHistogramData.leaderboard.leaderboardName}`).getContext('2d');
 						const image = new Image();
-						image.src = `/images/${levelHistogramData.leaderboard.levelName}.bytes.png`;
+						image.src = `${levelHistogramData.leaderboard.imageURL}`;
 						const histogramChart = new Chart(ctx, {
 							type: 'bar',
 							data: {

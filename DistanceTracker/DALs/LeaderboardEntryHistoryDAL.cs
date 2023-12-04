@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using DistanceTracker.Models;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,7 +31,8 @@ namespace DistanceTracker.DALs
 					OldRank,
 					NewRank,
 					UpdatedTimeUTC,
-					p.SteamAvatar
+					p.SteamAvatar,
+					l.ImageURL
 				FROM LeaderboardEntryHistory leh
 				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID
 				LEFT JOIN Players p on p.SteamID = leh.SteamID";
@@ -89,6 +91,7 @@ namespace DistanceTracker.DALs
 				{
 					ID = leh.LeaderboardID,
 					LevelName = reader.GetString(1),
+					ImageURL = reader.GetString(11),
 				};
 				leh.Player = new Player()
 				{
@@ -202,7 +205,8 @@ namespace DistanceTracker.DALs
 				OldRank,
 				NewRank,
 				UpdatedTimeUTC,
-				p.SteamAvatar
+				p.SteamAvatar,
+				l.ImageURL
 			FROM LeaderboardEntryHistory leh 
 			LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
 			LEFT JOIN Players p on p.SteamID = leh.SteamID 
@@ -231,6 +235,7 @@ namespace DistanceTracker.DALs
 				{
 					ID = leh.LeaderboardID,
 					LevelName = reader.GetString(1),
+					ImageURL = reader.GetString(11),
 				};
 				leh.Player = new Player()
 				{
