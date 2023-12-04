@@ -46,7 +46,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = @$"
-				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar FROM LeaderboardEntries le 
+				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL FROM LeaderboardEntries le 
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID 
 				LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
@@ -85,6 +85,7 @@ namespace DistanceTracker.DALs
 				{
 					ID = le.LeaderboardID,
 					LevelName = reader.GetString(1),
+					ImageURL = reader.GetString(8),
 				};
 				le.Player = new Player()
 				{
@@ -289,7 +290,8 @@ namespace DistanceTracker.DALs
 					le.SteamID,
 					l.LevelName,
 					p.Name,
-					p.SteamAvatar
+					p.SteamAvatar,
+					l.ImageURL
 				FROM(
 					SELECT
 						*,
@@ -318,6 +320,7 @@ namespace DistanceTracker.DALs
 				{
 					ID = reader.GetUInt32(3),
 					LevelName = reader.GetString(5),
+					ImageURL = reader.GetString(8),
 				};
 				rle.Player = new Player()
 				{
@@ -521,7 +524,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = @$"
-				SELECT le.LeaderboardID, l.LevelName, le.Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar
+				SELECT le.LeaderboardID, l.LevelName, le.Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL
 				FROM (SELECT LeaderboardID, MIN(Milliseconds) AS Milliseconds FROM LeaderboardEntries GROUP BY LeaderboardID) WR
 				LEFT JOIN LeaderboardEntries le ON WR.LeaderboardID = le.LeaderboardID AND WR.Milliseconds = le.Milliseconds
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID
@@ -546,6 +549,7 @@ namespace DistanceTracker.DALs
 				{
 					ID = le.LeaderboardID,
 					LevelName = reader.GetString(1),
+					ImageURL = reader.GetString(8),
 				};
 				le.Player = new Player()
 				{

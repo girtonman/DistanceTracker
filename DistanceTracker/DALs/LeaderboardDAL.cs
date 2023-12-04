@@ -18,17 +18,17 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"SELECT ID, LevelName, LeaderboardName, IsOfficial, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
+			var sql = $"SELECT ID, LevelName, LeaderboardName, IsOfficial, ImageURL, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
 			Leaderboard leaderboard = null;
 			while (reader.Read())
 			{
-				var bronzeTime = reader.IsDBNull(4) ? 0 : reader.GetUInt32(4);
-				var silverTime = reader.IsDBNull(5) ? 0 : reader.GetUInt32(5);
-				var goldTime = reader.IsDBNull(6) ? 0 : reader.GetUInt32(6);
-				var diamondTime = reader.IsDBNull(7) ? 0 : reader.GetUInt32(7);
+				var bronzeTime = reader.IsDBNull(5) ? 0 : reader.GetUInt32(5);
+				var silverTime = reader.IsDBNull(6) ? 0 : reader.GetUInt32(6);
+				var goldTime = reader.IsDBNull(7) ? 0 : reader.GetUInt32(7);
+				var diamondTime = reader.IsDBNull(8) ? 0 : reader.GetUInt32(8);
 
 				leaderboard = new Leaderboard()
 				{
@@ -36,6 +36,7 @@ namespace DistanceTracker.DALs
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
+					ImageURL = reader.GetString(4),
 					MedalTimes = new MapMedalTimes(bronzeTime, silverTime, goldTime, diamondTime),
 				};
 			}
@@ -74,6 +75,7 @@ namespace DistanceTracker.DALs
 			var sql = @"SELECT
 			lb.ID,
 			lb.LevelName,
+			lb.ImageURL,
 			lb.LeaderboardName,
 			lb.IsOfficial,
 			lb.SteamLeaderboardID,
@@ -112,13 +114,14 @@ namespace DistanceTracker.DALs
 				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
-					LeaderboardName = reader.GetString(2),
-					IsOfficial = reader.GetBoolean(3),
-					SteamLeaderboardID = reader.GetUInt64(4),
-					LevelSet = reader.IsDBNull(5) ? null : reader.GetString(5),
-					EntryCount = reader.IsDBNull(6) ? (uint?)null : reader.GetUInt32(6),
-					NewestTimeUTC = reader.IsDBNull(7) ? (ulong?)null : reader.GetUInt64(7),
-					NewestImprovementUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),
+					ImageURL = reader.GetString(2),
+					LeaderboardName = reader.GetString(3),
+					IsOfficial = reader.GetBoolean(4),
+					SteamLeaderboardID = reader.GetUInt64(5),
+					LevelSet = reader.IsDBNull(6) ? null : reader.GetString(6),
+					EntryCount = reader.IsDBNull(7) ? (uint?)null : reader.GetUInt32(7),
+					NewestTimeUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),
+					NewestImprovementUTC = reader.IsDBNull(9) ? (ulong?)null : reader.GetUInt64(9),
 				};
 				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ? 
 					(level.NewestTimeUTC.HasValue 
