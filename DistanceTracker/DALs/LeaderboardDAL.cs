@@ -45,6 +45,29 @@ namespace DistanceTracker.DALs
 			return leaderboard;
 		}
 
+		public async Task<List<Leaderboard>> GetOfficialLeaderboards()
+		{
+			var leaderboards = new List<Leaderboard>();
+			Connection.Open();
+
+			var sql = "SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards WHERE IsOfficial = 1";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			while(reader.Read())
+			{
+				leaderboards.Add(new Leaderboard() {
+					ID = reader.GetUInt32(0),
+					LevelName = reader.GetString(1),
+					LeaderboardName = reader.GetString(2),
+					IsOfficial = reader.GetBoolean(3),
+				});
+			}
+
+			Connection.Close();
+			return leaderboards;
+		}
+
 		public async Task<List<Leaderboard>> GetAllLeaderboards()
 		{
 			var leaderboards = new List<Leaderboard>();
