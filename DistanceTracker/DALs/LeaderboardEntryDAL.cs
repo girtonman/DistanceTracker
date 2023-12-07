@@ -113,7 +113,7 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<GlobalRankedLeaderboardEntry>> GetGlobalLeaderboard(int numRows = 100)
+		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(int numRows = 100)
 		{
 			Connection.Open();
 			var sql = @"
@@ -147,10 +147,10 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			var globalLeaderboardEntries = new List<GlobalRankedLeaderboardEntry>();
+			var globalLeaderboardEntries = new List<OverviewRankedLeaderboardEntry>();
 			while (reader.Read())
 			{
-				var grle = new GlobalRankedLeaderboardEntry()
+				var grle = new OverviewRankedLeaderboardEntry()
 				{
 					Rank = reader.GetInt32(1),
 					NoodlePoints = reader.GetDouble(2),
