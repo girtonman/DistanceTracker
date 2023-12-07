@@ -37,7 +37,7 @@ namespace DistanceTracker.DALs
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
 					ImageURL = reader.GetString(4),
-					MedalTimes = new MapMedalTimes(bronzeTime, silverTime, goldTime, diamondTime),
+					MedalTimes = new MapMedalTimes(diamondTime, goldTime, silverTime, bronzeTime),
 				};
 			}
 
