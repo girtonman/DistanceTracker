@@ -15,7 +15,7 @@ namespace DistanceTracker.DALs
 			Connection = new MySqlConnection(settings.ConnectionString);
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, uint? rankCutoff = null, ulong? after = null)
+		public async Task<List<LeaderboardEntryHistory>> GetRecentImprovements(int numRows = 20, ulong? steamID = null, List<uint> leaderboardIDs = null, uint? rankCutoff = null, ulong? after = null)
 		{
 			Connection.Open();
 			// Construct the base SELECT
@@ -43,9 +43,9 @@ namespace DistanceTracker.DALs
 			{
 				conditions.Add($"leh.SteamID = {steamID}");
 			}
-			if (leaderboardID.HasValue)
+			if (leaderboardIDs != null && leaderboardIDs.Count > 0)
 			{
-				conditions.Add($"leh.LeaderboardID = {leaderboardID}");
+				conditions.Add($"leh.LeaderboardID IN ({string.Join(",", leaderboardIDs)})");
 			}
 			if(rankCutoff.HasValue)
 			{
@@ -55,6 +55,7 @@ namespace DistanceTracker.DALs
 			{
 				conditions.Add($"leh.UpdatedTimeUTC > {after}");
 			}
+			
 			for(var i = 0; i < conditions.Count; i++)
 			{
 				if(i == 0)
@@ -164,8 +165,14 @@ namespace DistanceTracker.DALs
 			return entries;
 		}
 
-		public async Task<Dictionary<ulong, long>> GetGlobalPastWeeksImprovement(List<ulong> steamIDs = null)
+		public async Task<Dictionary<ulong, long>> GetPastWeeksImprovement(List<ulong> steamIDs = null, List<uint> leaderboardIDs = null)
 		{
+			var leaderboardClause = "";
+			if(leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			{
+				leaderboardClause = $" AND l.ID IN ({string.Join(",", leaderboardIDs)})";
+			}
+
 			Connection.Open();
 			var sql = @$"
 				SELECT 
@@ -174,7 +181,7 @@ namespace DistanceTracker.DALs
 				FROM LeaderboardEntryHistory leh 
 				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
 				LEFT JOIN Players p on p.SteamID = leh.SteamID
-				WHERE leh.UpdatedTimeUTC > {DateTimeOffset.UtcNow.AddDays(-7).ToUnixTimeMilliseconds()}
+				WHERE leh.UpdatedTimeUTC > {DateTimeOffset.UtcNow.AddDays(-7).ToUnixTimeMilliseconds()}{leaderboardClause}
 				{(steamIDs == null ? "" : $"AND leh.SteamID IN ({string.Join(',', steamIDs)})")}
 				GROUP BY leh.SteamID";
 			var command = new MySqlCommand(sql, Connection);
@@ -191,8 +198,18 @@ namespace DistanceTracker.DALs
 			return globalTimeImprovements;
 		}
 
-		public async Task<List<LeaderboardEntryHistory>> GetWRLog(int limit = 20)
+		public async Task<List<LeaderboardEntryHistory>> GetWRLog(int limit = 20, List<uint> leaderboardIDs = null)
 		{
+			var leaderboardClause = "";
+			if (leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			{
+				leaderboardClause = $"AND leh.LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
+			}
+			else if (leaderboardIDs.Count == 0)
+			{
+				return new List<LeaderboardEntryHistory>();
+			}
+
 			Connection.Open();
 			var sql = @$"SELECT 
 				leh.LeaderboardID,
@@ -210,7 +227,7 @@ namespace DistanceTracker.DALs
 			FROM LeaderboardEntryHistory leh 
 			LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID 
 			LEFT JOIN Players p on p.SteamID = leh.SteamID 
-			WHERE NewRank = 1
+			WHERE NewRank = 1 {leaderboardClause}
 			ORDER BY leh.UpdatedTimeUTC DESC
 			LIMIT {limit}";
 

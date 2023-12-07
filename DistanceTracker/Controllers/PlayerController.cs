@@ -64,8 +64,8 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetRecentActivity(ulong steamID)
 		{
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(40, steamID);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(40, steamID);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows:40, steamID:steamID);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:40, steamID:steamID);
 
 			var recentActivity = new List<Activity>();
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()

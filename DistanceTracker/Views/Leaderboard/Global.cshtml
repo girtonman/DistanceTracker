@@ -1,6 +1,6 @@
 ﻿@using DistanceTracker.Models
 @using Newtonsoft.Json
-@model GlobalLeaderboardViewModel
+@model OverviewLeaderboardViewModel
 
 @{
 	ViewData["Title"] = "Home Page";
@@ -108,9 +108,9 @@
 							<td class="text-left"><a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a></td>
 							<td>
 								@Formatter.TimeFromMs(entry.TotalMilliseconds)
-								@if(entry.LastWeeksGlobalTimeImprovement > 0)
+								@if(entry.LastWeeksTimeImprovement > 0)
 								{
-									@Html.Raw($"( <i class=\"fas fa-arrow-up fa-sm text-success\"></i> {Formatter.TimeFromMs(entry.LastWeeksGlobalTimeImprovement)} )")
+									@Html.Raw($"( <i class=\"fas fa-arrow-up fa-sm text-success\"></i> {Formatter.TimeFromMs(entry.LastWeeksTimeImprovement)} )")
 								}
 							</td>
 							<td>@entry.NumTracksCompleted</td>
