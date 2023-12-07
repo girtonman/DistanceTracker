@@ -22,26 +22,26 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> Global()
 		{
-			var viewModel = new GlobalLeaderboardViewModel
+			var leaderboards = await LeaderDAL.GetOfficialLeaderboards();
+			var leaderboardIDs = leaderboards.Select(x => x.ID).ToList();
+			var viewModel = new OverviewLeaderboardViewModel
 			{
 				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(),
 				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(),
-				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(),
-				WRLog = await HistoryDAL.GetWRLog(),
+				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(leaderboardIDs),
+				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs: leaderboardIDs),
 			};
 
 			// Add global time improvements to the entries
-			var globalTimeImprovements = await HistoryDAL.GetGlobalPastWeeksImprovement();
+			var globalTimeImprovements = await HistoryDAL.GetPastWeeksImprovement(leaderboardIDs: leaderboardIDs);
 			foreach(var entry in viewModel.LeaderboardEntries)
 			{
 				var steamID = entry.Player.SteamID;
 				if (globalTimeImprovements.ContainsKey(steamID))
 				{
-					entry.LastWeeksGlobalTimeImprovement = globalTimeImprovements[steamID];
+					entry.LastWeeksTimeImprovement = globalTimeImprovements[steamID];
 				}
 			}
-
-			//var mostImprovedTime = 
 
 			return View(viewModel);
 		}
@@ -49,8 +49,8 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> Level(uint leaderboardID)
 		{
 			var leaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
-			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(30, null, leaderboardID);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(30, null, leaderboardID);
+			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(numRows:30, leaderboardIDs: new List<uint>() {leaderboardID} );
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:30, leaderboardIDs: new List<uint>() {leaderboardID});
 			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
 
 			var viewModel = new LeaderboardViewModel()

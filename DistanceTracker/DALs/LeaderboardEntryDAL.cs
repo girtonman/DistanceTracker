@@ -42,7 +42,7 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, uint? leaderboardID = null, ulong? after = null)
+		public async Task<List<LeaderboardEntry>> GetRecentFirstSightings(int numRows = 20, ulong? steamID = null, List<uint> leaderboardIDs = null, ulong? after = null)
 		{
 			Connection.Open();
 			var sql = @$"
@@ -50,23 +50,35 @@ namespace DistanceTracker.DALs
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID 
 				LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
+			var conditions = new List<string>();
 			if (steamID.HasValue)
 			{
-				sql += $"WHERE le.SteamID = {steamID} ";
+				conditions.Add($"le.SteamID = {steamID}");
 			}
 
-			if (leaderboardID.HasValue)
+			if (leaderboardIDs != null && leaderboardIDs.Count > 0)
 			{
-				sql += $"WHERE le.LeaderboardID = {leaderboardID} ";
+				conditions.Add($"le.LeaderboardID IN ({string.Join(",", leaderboardIDs)})");
 			}
 			
 			if (after.HasValue)
 			{
-				sql += $"WHERE le.FirstSeenTimeUTC > {after} ";
+				conditions.Add($"le.FirstSeenTimeUTC > {after}");
 			}
 
-			sql += $"ORDER BY le.ID DESC "
-				+ $"LIMIT {numRows}";
+			for(var i = 0; i < conditions.Count; i++)
+			{
+				if(i == 0)
+				{
+					sql += $" WHERE {conditions[i]}";
+				}
+				else
+				{
+					sql += $" AND {conditions[i]}";
+				}
+			}
+
+			sql += $" ORDER BY le.ID DESC LIMIT {numRows}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -160,10 +172,108 @@ namespace DistanceTracker.DALs
 			return globalLeaderboardEntries;
 		}
 
-		public async Task<ulong> GetOptimalTotalTime()
+		public async Task<List<OverviewRankedLeaderboardEntry>> GetMultiLevelLeaderboard(uint rankCutoff, List<uint> leaderboardIDs, int numRows = 100)
 		{
+			if(leaderboardIDs == null || leaderboardIDs.Count == 0)
+			{
+				return new List<OverviewRankedLeaderboardEntry>();
+			}
+
 			Connection.Open();
-			var sql = @"
+			var sql = @$"
+				SELECT global_leaderboard.*,
+					ROUND(NoodlePoints / {leaderboardIDs.Count() * 10}.0, 2) as PlayerRating,
+					p.Name,
+					p.SteamAvatar
+				FROM(
+					SELECT
+						SteamID,
+						RANK() OVER(
+						  ORDER BY SUM(NoodlePoints) DESC
+						) as GlobalRank,
+						SUM(NoodlePoints) AS NoodlePoints,
+						SUM(Milliseconds) AS Milliseconds,
+						COUNT(*) AS NumTracksCompleted
+					FROM(
+						SELECT
+							*,
+							CASE WHEN `Rank` is NULL OR `Rank` > {rankCutoff} THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / {rankCutoff}) - 1.0), 2)))) END AS NoodlePoints
+						FROM(
+								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS `Rank` FROM LeaderboardEntries
+								WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})
+						) ranks
+					) le
+					GROUP BY SteamID
+					ORDER BY SUM(NoodlePoints) DESC
+					LIMIT " + numRows + @"
+				) global_leaderboard
+				LEFT JOIN Players p ON p.SteamID = global_leaderboard.SteamID";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var overviewLeaderboardEntries = new List<OverviewRankedLeaderboardEntry>();
+			while (reader.Read())
+			{
+				var orle = new OverviewRankedLeaderboardEntry()
+				{
+					Rank = reader.GetInt32(1),
+					NoodlePoints = reader.GetDouble(2),
+					TotalMilliseconds = reader.GetUInt64(3),
+					NumTracksCompleted = reader.GetUInt32(4),
+					PlayerRating = reader.GetDouble(5),
+				};
+				orle.Player = new Player()
+				{
+					SteamID = reader.GetUInt64(0),
+					Name = reader.GetString(6),
+					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
+				};
+				overviewLeaderboardEntries.Add(orle);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return overviewLeaderboardEntries;
+		}
+
+		public async Task<uint> GetMaxEntryCount(List<uint> leaderboardIDs)
+		{
+			var whereClause = "";
+			if(leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			{
+				whereClause = $"WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
+			}
+
+			Connection.Open();
+			var sql = $"SELECT COUNT(*) FROM LeaderboardEntries {whereClause} GROUP BY LeaderboardID ORDER BY 1 DESC LIMIT 1";
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			uint maxEntries = 0;
+			while (reader.Read())
+			{
+				maxEntries = reader.GetUInt32(0);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return maxEntries > 0 ? maxEntries : 1; // return 1 for safety from divide by zeroes later
+		}
+
+		public async Task<ulong> GetOptimalTotalTime(List<uint> leaderboardIDs)
+		{
+			var whereClause = "";
+			if (leaderboardIDs.Count > 0)
+			{
+				whereClause = $"WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
+			}
+			else
+			{
+				return 0;
+			}
+
+			Connection.Open();
+			var sql = @$"
 				SELECT
 					SUM(le.MinMilliseconds)
 				FROM Leaderboards l
@@ -172,6 +282,7 @@ namespace DistanceTracker.DALs
 						LeaderboardID,
 						MIN(Milliseconds) AS MinMilliseconds
 					FROM LeaderboardEntries
+					{whereClause}
 					GROUP BY LeaderboardID
 				) le ON le.LeaderboardID = l.ID";
 			var command = new MySqlCommand(sql, Connection);
@@ -409,6 +520,56 @@ namespace DistanceTracker.DALs
 							MIN(Milliseconds) MinTime
 						FROM LeaderboardEntries
 						WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
+						GROUP BY LeaderboardID
+					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
+					GROUP BY SteamID
+				) fpc ON fpc.SteamID = p.SteamID
+				ORDER BY fpc.Count DESC";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			var winnersCircle = new List<WinnersCircleEntry>();
+			while (reader.Read())
+			{
+				var entry = new WinnersCircleEntry()
+				{
+					Name = reader.GetString(0),
+					Count = reader.GetInt32(1),
+				};
+
+				winnersCircle.Add(entry);
+			}
+			reader.Close();
+			Connection.Close();
+
+			return winnersCircle;
+		}
+
+		public async Task<List<WinnersCircleEntry>> GetMultiLevelWinnersCircle(List<uint> leaderboardIDs)
+		{
+			if(leaderboardIDs == null || leaderboardIDs.Count == 0)
+			{
+				return new List<WinnersCircleEntry>();
+			}
+
+			Connection.Open();
+			var sql = $@"
+				SELECT 
+					p.Name,
+					fpc.Count
+				FROM Players p
+				JOIN (
+					SELECT 
+						SteamID, 
+						COUNT(SteamID) Count
+					FROM LeaderboardEntries le
+					JOIN (
+						SELECT 
+							LeaderboardID,
+							MIN(Milliseconds) MinTime
+						FROM LeaderboardEntries
+						WHERE LeaderboardID IN (" + string.Join(",", leaderboardIDs) + @")
 						GROUP BY LeaderboardID
 					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
 					GROUP BY SteamID
