@@ -10,7 +10,6 @@
 	});
 
 	function getGlobalRecentActivity() {
-		console.log(`fetching activity with timestamp ${lastUpdateTimeUTC}`);
 		$.ajax({
 			url: '/Home/GetGlobalRecentActivity',
 			method: 'GET',
