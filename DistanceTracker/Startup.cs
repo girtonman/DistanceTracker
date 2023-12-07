@@ -39,6 +39,7 @@ namespace DistanceTracker
 			services.AddTransient<LeaderboardEntryDAL>();
 			services.AddTransient<LeaderboardEntryHistoryDAL>();
 			services.AddTransient<SteamDAL>();
+			services.AddTransient<EventDAL>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
