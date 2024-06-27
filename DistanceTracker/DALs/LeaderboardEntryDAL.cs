@@ -113,12 +113,12 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(int numRows = 100)
+		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(int numLeaderboards, int numRows = 100)
 		{
 			Connection.Open();
-			var sql = @"
+			var sql = @$"
 				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating,
+					ROUND(NoodlePoints / (10.0 * {numLeaderboards}), 2) as PlayerRating,
 					p.Name,
 					p.SteamAvatar
 				FROM(
@@ -141,7 +141,7 @@ namespace DistanceTracker.DALs
 					) le
 					GROUP BY SteamID
 					ORDER BY SUM(NoodlePoints) DESC
-					LIMIT " + numRows + @"
+					LIMIT {numRows}
 				) global_leaderboard
 				LEFT JOIN Players p ON p.SteamID = global_leaderboard.SteamID";
 			var command = new MySqlCommand(sql, Connection);
@@ -641,7 +641,8 @@ namespace DistanceTracker.DALs
 					le.LeaderboardID,
 					l.LevelName,
 					l.LeaderboardName,
-					l.LevelSet
+					l.LevelSet,
+					l.ImageURL
 				FROM(
 					SELECT
 						*
@@ -670,7 +671,8 @@ namespace DistanceTracker.DALs
 					LeaderboardID = reader.GetUInt32(2),
 					LevelName = reader.GetString(3),
 					LeaderboardName = reader.GetString(4),
-					LevelSet = reader.GetString(5),
+					LevelSet = reader.IsDBNull(5) ? "None" : reader.GetString(5),
+					ImageURL = reader.IsDBNull(6) ? null : reader.GetString(6),
 				};
 
 				percentileRanks.Add(percentileRank);

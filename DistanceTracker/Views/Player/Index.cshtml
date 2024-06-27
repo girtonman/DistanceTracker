@@ -291,8 +291,12 @@
 
 						// Create the chart for each level
 						const ctx = document.getElementById(`histogram-${levelHistogramData.leaderboard.leaderboardName}`).getContext('2d');
+						const defaultImage = new Image();
 						const image = new Image();
 						image.src = `${levelHistogramData.leaderboard.imageURL}`;
+						
+						const imageToUse = image.height != 0 ? image : defaultImage;  // Use a blank image if the image can't be found
+
 						const histogramChart = new Chart(ctx, {
 							type: 'bar',
 							data: {
@@ -332,17 +336,16 @@
 								{
 									id: `custom_canvas_background_image_${levelHistogramData.leaderboard.leaderboardName}`,
 									beforeDraw: (chart) => {
-										console.log(image);
-										if (image.complete) {
+										if (imageToUse.complete) {
 											const ctx = chart.ctx;
 											const {top, left, width, height} = chart.chartArea;
-											const x = left + width / 2 - image.width / 2;
-											const y = top + height / 2 - image.height / 2;
+											const x = left + width / 2 - imageToUse.width / 2;
+											const y = top + height / 2 - imageToUse.height / 2;
 											ctx.globalAlpha = 0.15;
-											ctx.drawImage(image, x, y);
+											ctx.drawImage(imageToUse, x, y);
 											ctx.globalAlpha = 1;
 										} else {
-											image.onload = () => chart.draw();
+											imageToUse.onload = () => chart.draw();
 										}
 									}
 								}

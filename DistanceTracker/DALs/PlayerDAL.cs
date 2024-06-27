@@ -80,7 +80,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"UPDATE Players SET Name = @steamName WHERE SteamID = {steamID}";
+			var sql = $"UPDATE Players SET Name = '@steamName' WHERE SteamID = {steamID}";
 
 			var command = new MySqlCommand(sql, Connection);
 			command.Parameters.AddWithValue("@steamName", steamName);
@@ -94,7 +94,8 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 			var sql = $@"
 				WITH
-				  TracksCompleted AS(SELECT COUNT(*) AS TracksCompleted FROM LeaderboardEntries WHERE SteamID = {steamID}),
+				  OfficialTracksCompleted AS(SELECT COUNT(*) AS OfficialTracksCompleted FROM LeaderboardEntries le LEFT JOIN Leaderboards l ON le.LeaderboardID = l.ID WHERE l.IsOfficial = 1 AND SteamID = {steamID}),
+				  UnofficialTracksCompleted AS(SELECT COUNT(*) AS UnofficialTracksCompleted FROM LeaderboardEntries le LEFT JOIN Leaderboards l ON le.LeaderboardID = l.ID WHERE l.IsOfficial = 0 AND SteamID = {steamID}),
 				  TotalImprovements AS(SELECT COUNT(*) AS TotalImprovements FROM LeaderboardEntryHistory WHERE SteamID = {steamID}),
 				  FirstSeenTime AS(SELECT FirstSeenTimeUTC FROM LeaderboardEntries WHERE SteamID = {steamID} ORDER BY FirstSeenTimeUTC ASC LIMIT 1),
 				  MostActiveLevel AS(
@@ -111,7 +112,7 @@ namespace DistanceTracker.DALs
 					GROUP BY LevelName
 					LIMIT 1
 				)
-				SELECT* FROM TracksCompleted JOIN TotalImprovements JOIN FirstSeenTime JOIN MostActiveLevel";
+				SELECT* FROM OfficialTracksCompleted JOIN UnofficialTracksCompleted JOIN TotalImprovements JOIN FirstSeenTime JOIN MostActiveLevel";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -120,11 +121,12 @@ namespace DistanceTracker.DALs
 			{
 				funStats = new FunStats()
 				{
-					TracksCompleted = reader.GetInt32(0),
-					TotalImprovements = reader.GetInt32(1),
-					FirstSeenTimeUTC = reader.GetUInt64(2),
-					MostImprovements = reader.GetInt32(3),
-					MostImprovementsLevel = reader.GetString(4),
+					OfficialTracksCompleted = reader.GetInt32(0),
+					UnofficialTracksCompleted = reader.GetInt32(1),
+					TotalImprovements = reader.GetInt32(2),
+					FirstSeenTimeUTC = reader.GetUInt64(3),
+					MostImprovements = reader.GetInt32(4),
+					MostImprovementsLevel = reader.GetString(5),
 				};
 			}
 			reader.Close();

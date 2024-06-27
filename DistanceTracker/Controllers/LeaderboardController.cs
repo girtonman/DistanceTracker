@@ -26,7 +26,7 @@ namespace DistanceTracker.Controllers
 			var leaderboardIDs = leaderboards.Select(x => x.ID).ToList();
 			var viewModel = new OverviewLeaderboardViewModel
 			{
-				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(),
+				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboardIDs.Count),
 				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(),
 				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(leaderboardIDs),
 				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs: leaderboardIDs),
@@ -84,7 +84,7 @@ namespace DistanceTracker.Controllers
 
 			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x => {
 				var levelSet = x.First().LevelSet;
-				return levelSetOrder.ContainsKey(levelSet) ? levelSetOrder[levelSet] : 99999;
+				return levelSet != null && levelSetOrder.ContainsKey(levelSet) ? levelSetOrder[levelSet] : 99999;
 			})
 			.ThenBy(x => x.First().LevelSet);
 

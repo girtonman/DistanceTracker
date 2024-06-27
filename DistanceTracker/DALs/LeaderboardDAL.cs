@@ -140,7 +140,7 @@ namespace DistanceTracker.DALs
 					ImageURL = reader.GetString(2),
 					LeaderboardName = reader.GetString(3),
 					IsOfficial = reader.GetBoolean(4),
-					SteamLeaderboardID = reader.GetUInt64(5),
+					SteamLeaderboardID = reader.IsDBNull(5) ? (ulong?)null : reader.GetUInt64(5),
 					LevelSet = reader.IsDBNull(6) ? null : reader.GetString(6),
 					EntryCount = reader.IsDBNull(7) ? (uint?)null : reader.GetUInt32(7),
 					NewestTimeUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),

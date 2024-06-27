@@ -2,7 +2,8 @@
 {
 	public class FunStats
 	{
-		public int TracksCompleted { get; set; }
+		public int OfficialTracksCompleted { get; set; }
+		public int UnofficialTracksCompleted { get; set; }
 		public int TotalImprovements { get; set; }
 		public ulong FirstSeenTimeUTC { get; set; }
 		public string FirstSeen
