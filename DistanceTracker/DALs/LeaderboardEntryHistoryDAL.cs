@@ -47,18 +47,18 @@ namespace DistanceTracker.DALs
 			{
 				conditions.Add($"leh.LeaderboardID IN ({string.Join(",", leaderboardIDs)})");
 			}
-			if(rankCutoff.HasValue)
+			if (rankCutoff.HasValue)
 			{
 				conditions.Add($"leh.NewRank <= {rankCutoff}");
 			}
-			if(after.HasValue)
+			if (after.HasValue)
 			{
 				conditions.Add($"leh.UpdatedTimeUTC > {after}");
 			}
-			
-			for(var i = 0; i < conditions.Count; i++)
+
+			for (var i = 0; i < conditions.Count; i++)
 			{
-				if(i == 0)
+				if (i == 0)
 				{
 					sql += $" WHERE {conditions[i]}";
 				}
@@ -168,7 +168,7 @@ namespace DistanceTracker.DALs
 		public async Task<Dictionary<ulong, long>> GetPastWeeksImprovement(List<ulong> steamIDs = null, List<uint> leaderboardIDs = null)
 		{
 			var leaderboardClause = "";
-			if(leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			if (leaderboardIDs != null && leaderboardIDs.Count > 0)
 			{
 				leaderboardClause = $" AND l.ID IN ({string.Join(",", leaderboardIDs)})";
 			}
@@ -201,7 +201,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<LeaderboardEntryHistory>> GetWRLog(int limit = 20, List<uint> leaderboardIDs = null)
 		{
 			var leaderboardClause = "";
-			if (leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			if (leaderboardIDs != null && leaderboardIDs.Count > 0)
 			{
 				leaderboardClause = $"AND leh.LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
 			}

@@ -1,9 +1,7 @@
 ﻿using DistanceTracker.Models.Steam;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -11,7 +9,8 @@ namespace DistanceTracker.DALs
 {
 	public class SteamDAL
 	{
-		public SteamDAL(Settings settings) {
+		public SteamDAL(Settings settings)
+		{
 			SteamAPIKey = settings.SteamAPIKey;
 		}
 

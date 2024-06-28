@@ -1,7 +1,6 @@
 ﻿using DistanceTracker.DALs;
 using DistanceTracker.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,8 +34,8 @@ namespace DistanceTracker.Controllers
 			var eventLeaderboardIDs = await EventDAL.GetEventLeaderboards(eventID);
 
 			// Get data
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows:100, after:after, leaderboardIDs: eventLeaderboardIDs);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:100, after:after, leaderboardIDs: eventLeaderboardIDs);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows: 100, after: after, leaderboardIDs: eventLeaderboardIDs);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 100, after: after, leaderboardIDs: eventLeaderboardIDs);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -84,13 +83,13 @@ namespace DistanceTracker.Controllers
 				LeaderboardEntries = await EntryDAL.GetMultiLevelLeaderboard(maxEntryCount, eventLeaderboardIDs),
 				WinnersCircle = await EntryDAL.GetMultiLevelWinnersCircle(eventLeaderboardIDs),
 				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(eventLeaderboardIDs),
-				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs:eventLeaderboardIDs),
+				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs: eventLeaderboardIDs),
 				EventDetails = eventDetails,
 			};
 
 			// Add global time improvements to the entries
 			var globalTimeImprovements = await HistoryDAL.GetPastWeeksImprovement(leaderboardIDs: eventLeaderboardIDs);
-			foreach(var entry in viewModel.LeaderboardEntries)
+			foreach (var entry in viewModel.LeaderboardEntries)
 			{
 				var steamID = entry.Player.SteamID;
 				if (globalTimeImprovements.ContainsKey(steamID))

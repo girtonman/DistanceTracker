@@ -1,6 +1,5 @@
 ﻿using DistanceTracker.DALs;
 using DistanceTracker.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;

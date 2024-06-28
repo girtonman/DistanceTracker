@@ -67,8 +67,8 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetRecentActivity(ulong steamID)
 		{
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows:40, steamID:steamID);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:40, steamID:steamID);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows: 40, steamID: steamID);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 40, steamID: steamID);
 
 			var recentActivity = new List<Activity>();
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
@@ -178,13 +178,13 @@ namespace DistanceTracker.Controllers
 		{
 			var players = await SteamDAL.GetPlayerSummaries(steamID);
 			var player = players.FirstOrDefault();
-			if(player != null)
+			if (player != null)
 			{
 				await PlayerDAL.UpdateSteamAvatar(steamID, player.Avatar);
 				await PlayerDAL.UpdateSteamName(steamID, player.PersonaName);
 			}
 
-			return RedirectToAction("Index", new {steamID = steamID});
+			return RedirectToAction("Index", new { steamID = steamID });
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

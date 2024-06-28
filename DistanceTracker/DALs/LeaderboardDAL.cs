@@ -54,9 +54,10 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			while(reader.Read())
+			while (reader.Read())
 			{
-				leaderboards.Add(new Leaderboard() {
+				leaderboards.Add(new Leaderboard()
+				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
@@ -77,9 +78,10 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			while(reader.Read())
+			while (reader.Read())
 			{
-				leaderboards.Add(new Leaderboard() {
+				leaderboards.Add(new Leaderboard()
+				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
@@ -131,7 +133,7 @@ namespace DistanceTracker.DALs
 			var reader = await command.ExecuteReaderAsync();
 
 			var levels = new List<Level>();
-			while(reader.Read())
+			while (reader.Read())
 			{
 				var level = new Level()
 				{
@@ -146,10 +148,10 @@ namespace DistanceTracker.DALs
 					NewestTimeUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),
 					NewestImprovementUTC = reader.IsDBNull(9) ? (ulong?)null : reader.GetUInt64(9),
 				};
-				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ? 
-					(level.NewestTimeUTC.HasValue 
-						? System.Math.Max(level.NewestTimeUTC.Value, level.NewestImprovementUTC.Value) 
-						: level.NewestTimeUTC) 
+				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ?
+					(level.NewestTimeUTC.HasValue
+						? System.Math.Max(level.NewestTimeUTC.Value, level.NewestImprovementUTC.Value)
+						: level.NewestTimeUTC)
 					: null;
 
 				levels.Add(level);

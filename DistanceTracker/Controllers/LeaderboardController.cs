@@ -34,7 +34,7 @@ namespace DistanceTracker.Controllers
 
 			// Add global time improvements to the entries
 			var globalTimeImprovements = await HistoryDAL.GetPastWeeksImprovement(leaderboardIDs: leaderboardIDs);
-			foreach(var entry in viewModel.LeaderboardEntries)
+			foreach (var entry in viewModel.LeaderboardEntries)
 			{
 				var steamID = entry.Player.SteamID;
 				if (globalTimeImprovements.ContainsKey(steamID))
@@ -49,8 +49,8 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> Level(uint leaderboardID)
 		{
 			var leaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
-			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(numRows:30, leaderboardIDs: new List<uint>() {leaderboardID} );
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:30, leaderboardIDs: new List<uint>() {leaderboardID});
+			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(numRows: 30, leaderboardIDs: new List<uint>() { leaderboardID });
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 30, leaderboardIDs: new List<uint>() { leaderboardID });
 			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
 
 			var viewModel = new LeaderboardViewModel()
@@ -82,7 +82,8 @@ namespace DistanceTracker.Controllers
 				{ "Legacy", 9},
 			};
 
-			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x => {
+			var groupedLevels = levels.GroupBy(x => x.LevelSet).OrderBy(x =>
+			{
 				var levelSet = x.First().LevelSet;
 				return levelSet != null && levelSetOrder.ContainsKey(levelSet) ? levelSetOrder[levelSet] : 99999;
 			})

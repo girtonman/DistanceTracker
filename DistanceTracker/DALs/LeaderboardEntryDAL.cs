@@ -60,15 +60,15 @@ namespace DistanceTracker.DALs
 			{
 				conditions.Add($"le.LeaderboardID IN ({string.Join(",", leaderboardIDs)})");
 			}
-			
+
 			if (after.HasValue)
 			{
 				conditions.Add($"le.FirstSeenTimeUTC > {after}");
 			}
 
-			for(var i = 0; i < conditions.Count; i++)
+			for (var i = 0; i < conditions.Count; i++)
 			{
-				if(i == 0)
+				if (i == 0)
 				{
 					sql += $" WHERE {conditions[i]}";
 				}
@@ -174,7 +174,7 @@ namespace DistanceTracker.DALs
 
 		public async Task<List<OverviewRankedLeaderboardEntry>> GetMultiLevelLeaderboard(uint rankCutoff, List<uint> leaderboardIDs, int numRows = 100)
 		{
-			if(leaderboardIDs == null || leaderboardIDs.Count == 0)
+			if (leaderboardIDs == null || leaderboardIDs.Count == 0)
 			{
 				return new List<OverviewRankedLeaderboardEntry>();
 			}
@@ -239,7 +239,7 @@ namespace DistanceTracker.DALs
 		public async Task<uint> GetMaxEntryCount(List<uint> leaderboardIDs)
 		{
 			var whereClause = "";
-			if(leaderboardIDs != null  && leaderboardIDs.Count > 0)
+			if (leaderboardIDs != null && leaderboardIDs.Count > 0)
 			{
 				whereClause = $"WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
 			}
@@ -548,7 +548,7 @@ namespace DistanceTracker.DALs
 
 		public async Task<List<WinnersCircleEntry>> GetMultiLevelWinnersCircle(List<uint> leaderboardIDs)
 		{
-			if(leaderboardIDs == null || leaderboardIDs.Count == 0)
+			if (leaderboardIDs == null || leaderboardIDs.Count == 0)
 			{
 				return new List<WinnersCircleEntry>();
 			}

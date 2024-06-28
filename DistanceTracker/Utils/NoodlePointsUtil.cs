@@ -13,7 +13,7 @@ namespace DistanceTracker
 
 		public static int CalculateImprovement(List<LeaderboardEntryHistory> improvements)
 		{
-			return improvements.Sum(x => CalculateDifference((int) x.OldRank, (int) x.NewRank));
+			return improvements.Sum(x => CalculateDifference((int)x.OldRank, (int)x.NewRank));
 		}
 
 		public static int CalculateDifference(int oldRank, int newRank)
@@ -25,12 +25,12 @@ namespace DistanceTracker
 		{
 			// C# version of the SQL point calculation formula
 			//ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2))))
-			if(rank > 1000)
+			if (rank > 1000)
 			{
 				return 0;
 			}
 
-			return (int) (1000.0 * (1.0 - Math.Sqrt(1.0 - Math.Pow(((rank - 1.0) / 1000.0) - 1.0, 2))));
+			return (int)(1000.0 * (1.0 - Math.Sqrt(1.0 - Math.Pow(((rank - 1.0) / 1000.0) - 1.0, 2))));
 		}
 	}
 }

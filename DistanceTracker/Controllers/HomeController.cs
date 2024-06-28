@@ -35,8 +35,8 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetGlobalRecentActivity(ulong? after = null)
 		{
 			// Get data
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows:100, after:after);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:100, after:after);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows: 100, after: after);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 100, after: after);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -77,7 +77,7 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetWRActivity()
 		{
 			// Get data
-			var recentWRs = await HistoryDAL.GetRecentImprovements(numRows:100, rankCutoff: 1);
+			var recentWRs = await HistoryDAL.GetRecentImprovements(numRows: 100, rankCutoff: 1);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();
@@ -113,7 +113,7 @@ namespace DistanceTracker.Controllers
 		public async Task<IActionResult> GetTop100RecentActivity()
 		{
 			// Get data
-			var recentTop100 = await HistoryDAL.GetRecentImprovements(numRows:100, rankCutoff: 100);
+			var recentTop100 = await HistoryDAL.GetRecentImprovements(numRows: 100, rankCutoff: 100);
 
 			// Prepare empty view model
 			var recentActivity = new List<Activity>();

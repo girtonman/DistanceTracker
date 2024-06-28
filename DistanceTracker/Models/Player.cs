@@ -22,7 +22,7 @@ namespace DistanceTracker.Models
 			{
 				var players = await steamDAL.GetPlayerSummaries(SteamID);
 				var player = players.FirstOrDefault();
-				if(player == null)
+				if (player == null)
 				{
 					SteamAvatar = "Unknown";
 				}
@@ -33,7 +33,7 @@ namespace DistanceTracker.Models
 				}
 			}
 
-			if(string.IsNullOrEmpty(suffix))
+			if (string.IsNullOrEmpty(suffix))
 			{
 				return SteamAvatar;
 			}
