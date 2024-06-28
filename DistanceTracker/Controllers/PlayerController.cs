@@ -157,6 +157,12 @@ namespace DistanceTracker.Controllers
 					},
 				};
 
+				// Skip levels that are over the limit
+				if(groupedHistogramDataPoints.FirstOrDefault(x => x.Key == percentileRank.LeaderboardID) == null)
+				{
+					continue;
+				}
+
 				// Create the data point dictionary for the histogram
 				var histogramDataPoints = groupedHistogramDataPoints
 					.First(x => x.Key == percentileRank.LeaderboardID)
@@ -170,6 +176,9 @@ namespace DistanceTracker.Controllers
 
 				histograms.Add(histogram);
 			}
+
+			// TODO: This limit is here until I rewrite the global comparisons to be searchable
+			histograms = histograms.Take(100).ToList();
 
 			return new JsonResult(histograms.GroupBy(x => x.Leaderboard.LevelSet).ToDictionary(x => x.Key, x => x.ToList()));
 		}
