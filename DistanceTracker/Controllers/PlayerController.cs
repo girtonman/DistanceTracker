@@ -36,11 +36,11 @@ namespace DistanceTracker.Controllers
 			var officialLeaderboards = await LeaderDAL.GetLeaderboards(true);
 			var officalLeaderboardIDs = officialLeaderboards.Select(x => x.ID).ToList();
 
-			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID);
+			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID, officalLeaderboardIDs);
 
 			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID, officalLeaderboardIDs);
 			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
-			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
+			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement, officalLeaderboardIDs);
 			var funStats = await PlayerDAL.GetFunStats(steamID);
 
 			var stats = new PlayerGlobalStats

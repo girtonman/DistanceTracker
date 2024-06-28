@@ -303,31 +303,52 @@ namespace DistanceTracker.DALs
 			return 0;
 		}
 
-		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID)
+		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID, List<uint> leaderboardIDs)
 		{
-			Connection.Open();
-			var sql = @"
-				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating
-				FROM(
+			// Hide our optimization sins in a nice little package
+			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
+			// so that we can force the RANK() to be limited to the least amount of rows possible
+			// This cursed optimization brought to you by noodle_beard and JnvSor
+			var materializedUnion = string.Join(" UNION ALL ", leaderboardIDs
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID FROM LeaderboardEntries WHERE LeaderboardID = {x} ORDER BY Milliseconds ASC LIMIT 1000)"));
+
+			var sql = $@"
+				WITH limited_entries AS
+				(
+					{materializedUnion}
+				),
+				ranks AS
+				(
+					SELECT 
+						Milliseconds,
+						LeaderboardID,
+						SteamID,
+						RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM limited_entries
+				),
+				le AS
+				(
+					SELECT
+						*,
+						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
+					FROM ranks
+				),
+				global_leaderboard AS
+				(
 					SELECT
 						SteamID,
-						RANK() OVER(
-						  ORDER BY SUM(NoodlePoints) DESC
-						) as GlobalRank,
-						SUM(NoodlePoints) as NoodlePoints
-					FROM(
-						SELECT
-							*,
-							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
-						FROM(
-								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
-								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
-						) ranks
-					) le
+						SUM(NoodlePoints) as TotalNoodlePoints,
+						RANK() OVER(ORDER BY SUM(NoodlePoints) DESC) AS GlobalRank
+					FROM le
 					GROUP BY SteamID
-				) global_leaderboard WHERE SteamID = " + steamID;
+				)
 
+				SELECT 
+					*,
+					ROUND(TotalNoodlePoints / 1200.0, 2) as PlayerRating
+				FROM global_leaderboard
+				WHERE SteamID = {steamID}";
+
+			Connection.Open();
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -336,8 +357,8 @@ namespace DistanceTracker.DALs
 			{
 				globalRanking = new RankedLeaderboardEntry()
 				{
-					Rank = reader.GetInt32(1),
-					NoodlePoints = reader.GetDouble(2),
+					NoodlePoints = reader.GetDouble(1),
+					Rank = reader.GetInt32(2),
 					PlayerRating = reader.GetDouble(3),
 				};
 			}
@@ -347,34 +368,54 @@ namespace DistanceTracker.DALs
 			return globalRanking;
 		}
 
-		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPoints(int points)
-		{
-			Connection.Open();
-			var sql = @"
-				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / 1200.0, 2) as PlayerRating
-				FROM(
+		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPoints(int points, List<uint> leaderboardIDs)
+		{		
+			// Hide our optimization sins in a nice little package
+			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
+			// so that we can force the RANK() to be limited to the least amount of rows possible
+			// This cursed optimization brought to you by noodle_beard and JnvSor
+			var materializedUnion = string.Join(" UNION ALL ", leaderboardIDs
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID FROM LeaderboardEntries WHERE LeaderboardID = {x} ORDER BY Milliseconds ASC LIMIT 1000)"));
+
+			var sql = $@"
+				WITH limited_entries AS
+				(
+					{materializedUnion}
+				),
+				ranks AS
+				(
+					SELECT 
+						Milliseconds,
+						LeaderboardID,
+						SteamID,
+						RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM limited_entries
+				),
+				le AS
+				(
+					SELECT
+						*,
+						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
+					FROM ranks
+				),
+				global_leaderboard AS
+				(
 					SELECT
 						SteamID,
-						RANK() OVER(
-						  ORDER BY SUM(NoodlePoints) DESC
-						) as GlobalRank,
-						SUM(NoodlePoints) as NoodlePoints
-					FROM(
-						SELECT
-							*,
-							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
-						FROM(
-								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
-								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
-						) ranks
-					) le
+						SUM(NoodlePoints) as TotalNoodlePoints,
+						RANK() OVER(ORDER BY SUM(NoodlePoints) DESC) AS GlobalRank
+					FROM le
 					GROUP BY SteamID
-				) global_leaderboard
-				WHERE NoodlePoints <= " + points + @"
-				ORDER BY NoodlePoints DESC
+				)
+
+				SELECT
+					*,
+					ROUND(TotalNoodlePoints / 1200.0, 2) as PlayerRating
+				FROM global_leaderboard
+				WHERE TotalNoodlePoints <= {points}
+				ORDER BY TotalNoodlePoints DESC
 				LIMIT 1";
 
+			Connection.Open();
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -383,8 +424,8 @@ namespace DistanceTracker.DALs
 			{
 				globalRanking = new RankedLeaderboardEntry()
 				{
-					Rank = reader.GetInt32(1),
-					NoodlePoints = reader.GetDouble(2),
+					NoodlePoints = reader.GetDouble(1),
+					Rank = reader.GetInt32(2),
 					PlayerRating = reader.GetDouble(3),
 				};
 			}
