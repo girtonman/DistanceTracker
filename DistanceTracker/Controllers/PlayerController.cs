@@ -33,7 +33,7 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetGlobalStats(ulong steamID)
 		{
-			var officialLeaderboards = await LeaderDAL.GetOfficialLeaderboards();
+			var officialLeaderboards = await LeaderDAL.GetLeaderboards(true);
 			var officalLeaderboardIDs = officialLeaderboards.Select(x => x.ID).ToList();
 
 			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID);

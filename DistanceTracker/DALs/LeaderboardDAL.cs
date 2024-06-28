@@ -1,6 +1,7 @@
 ﻿using DistanceTracker.Models;
 using MySqlConnector;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DistanceTracker.DALs
@@ -45,15 +46,27 @@ namespace DistanceTracker.DALs
 			return leaderboard;
 		}
 
-		public async Task<List<Leaderboard>> GetOfficialLeaderboards()
+		public async Task<List<Leaderboard>> GetLeaderboards(bool? isOfficial = null, LevelType? levelType = null)
 		{
-			var leaderboards = new List<Leaderboard>();
 			Connection.Open();
+			var select = "SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards ";
 
-			var sql = "SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards WHERE IsOfficial = 1";
+			var clauses = new List<string>();
+			if(isOfficial.HasValue)
+			{
+				clauses.Add($"IsOfficial = {(isOfficial.Value ? 1 : 0)}");
+			}
+			if(levelType.HasValue)
+			{
+				clauses.Add($"LevelType = {levelType.Value:D}");
+			}
+			var where = (clauses.Count != 0 ? "WHERE " : "") + string.Join(" AND ", clauses);
+
+			var sql = select + where;
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
+			var leaderboards = new List<Leaderboard>();
 			while (reader.Read())
 			{
 				leaderboards.Add(new Leaderboard()

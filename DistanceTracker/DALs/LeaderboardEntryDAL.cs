@@ -115,6 +115,11 @@ namespace DistanceTracker.DALs
 
 		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(List<uint> leaderboardIDs, int numRows = 100)
 		{
+			if(leaderboardIDs.Count == 0)
+			{
+				return new List<OverviewRankedLeaderboardEntry>();
+			}
+
 			Connection.Open();
 			var sql = @$"
 				SELECT global_leaderboard.*,
@@ -503,6 +508,11 @@ namespace DistanceTracker.DALs
 
 		public async Task<List<WinnersCircleEntry>> GetGlobalWinnersCircle(List<uint> leaderboardIDs)
 		{
+			if(leaderboardIDs.Count == 0)
+			{
+				return new List<WinnersCircleEntry>();
+			}
+
 			Connection.Open();
 			var sql = $@"
 				SELECT 
