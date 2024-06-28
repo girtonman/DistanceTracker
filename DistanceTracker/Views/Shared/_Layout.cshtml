@@ -48,7 +48,20 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 				<div class="navbar-nav">
-					<a class="nav-item nav-link" href="/Leaderboard/Global">Leaderboard</a>
+					<div class="nav-item dropdown">
+						<a class="nav-link" data-toggle="dropdown" href="#" role="button">Leaderboards</a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="/Leaderboard/OfficialGlobal">All Official Levels</a>
+							<a class="dropdown-item" href="/Leaderboard/OfficialSprint">Official Sprint</a>
+							<a class="dropdown-item" href="/Leaderboard/OfficialChallenge">Official Challenge</a>
+							<a class="dropdown-item" href="/Leaderboard/OfficialStunt">Official Stunt</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/Leaderboard/WorkshopGlobal">All Workshop Levels</a>
+							<a class="dropdown-item" href="/Leaderboard/WorkshopSprint">Workshop Sprint</a>
+							<a class="dropdown-item" href="/Leaderboard/WorkshopChallenge">Workshop Challenge</a>
+							<a class="dropdown-item" href="/Leaderboard/WorkshopStunt">Workshop Stunt</a>
+						</div>
+					</div>
 					<div class="nav-item dropdown">
 						<a class="nav-link" data-toggle="dropdown" href="#" role="button">Activity</a>
 						<div class="dropdown-menu">
@@ -68,11 +81,7 @@
 					<a class="nav-item nav-link" href="/Player/Compare">Compare</a>
 				</div>
 			</div>
-			@if (controller == "Home" && action == "Index")
-			{
-
-			}
-			else
+			@if (controller != "Home" || action != "Index")
 			{
 			<form class="form-inline" action="/search" method="get">
 				<input class="form-control mr-sm-2" name="q" placeholder="Enter player name">

@@ -4,6 +4,7 @@ namespace DistanceTracker.Models
 {
 	public class OverviewLeaderboardViewModel
 	{
+		public string LeaderboardName { get; set; }
 		public List<WinnersCircleEntry> WinnersCircle { get; set; }
 		public List<OverviewRankedLeaderboardEntry> LeaderboardEntries { get; set; }
 		public List<LeaderboardEntryHistory> WRLog { get; set; }

@@ -20,14 +20,21 @@ namespace DistanceTracker.Controllers
 		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
 		public LeaderboardDAL LeaderDAL { get; }
 
-		public async Task<IActionResult> Global()
+		public async Task<IActionResult> OfficialSprint()
 		{
 			var leaderboards = await LeaderDAL.GetOfficialLeaderboards();
 			var leaderboardIDs = leaderboards.Select(x => x.ID).ToList();
+			var viewModel = await GetOverviewForLeaderboardIDs(leaderboardIDs);
+			viewModel.LeaderboardName = "Global Leaderboard (Official Sprint Levels)";
+			return View("Overview", viewModel);
+		}
+
+		private async Task<OverviewLeaderboardViewModel> GetOverviewForLeaderboardIDs(List<uint> leaderboardIDs)
+		{
 			var viewModel = new OverviewLeaderboardViewModel
 			{
-				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboardIDs.Count),
-				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(),
+				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboardIDs),
+				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(leaderboardIDs),
 				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(leaderboardIDs),
 				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs: leaderboardIDs),
 			};
@@ -43,7 +50,7 @@ namespace DistanceTracker.Controllers
 				}
 			}
 
-			return View(viewModel);
+			return viewModel;
 		}
 
 		public async Task<IActionResult> Level(uint leaderboardID)

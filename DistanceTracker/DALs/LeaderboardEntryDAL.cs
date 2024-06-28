@@ -113,12 +113,12 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(int numLeaderboards, int numRows = 100)
+		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(List<uint> leaderboardIDs, int numRows = 100)
 		{
 			Connection.Open();
 			var sql = @$"
 				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / (10.0 * {numLeaderboards}), 2) as PlayerRating,
+					ROUND(NoodlePoints / (10.0 * {leaderboardIDs.Count}), 2) as PlayerRating,
 					p.Name,
 					p.SteamAvatar
 				FROM(
@@ -136,7 +136,7 @@ namespace DistanceTracker.DALs
 							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 						FROM(
 								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS `Rank` FROM LeaderboardEntries
-								WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
+								WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)})
 						) ranks
 					) le
 					GROUP BY SteamID
@@ -501,7 +501,7 @@ namespace DistanceTracker.DALs
 			return rankedEntries;
 		}
 
-		public async Task<List<WinnersCircleEntry>> GetGlobalWinnersCircle()
+		public async Task<List<WinnersCircleEntry>> GetGlobalWinnersCircle(List<uint> leaderboardIDs)
 		{
 			Connection.Open();
 			var sql = $@"
@@ -519,7 +519,7 @@ namespace DistanceTracker.DALs
 							LeaderboardID,
 							MIN(Milliseconds) MinTime
 						FROM LeaderboardEntries
-						WHERE LeaderboardID IN (SELECT ID FROM Leaderboards WHERE IsOfficial = 1)
+						WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)})
 						GROUP BY LeaderboardID
 					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
 					GROUP BY SteamID
