@@ -360,3 +360,12 @@ hr {
 .fa-xxs {
 	font-size: 0.85rem;
 }
+
+.info-card {
+	background-color: #212529;
+	padding: 15px;
+}
+
+.rounded-corners {
+	border-radius: 0.25rem;
+}
