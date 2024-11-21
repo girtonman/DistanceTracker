@@ -9,7 +9,7 @@
 	ViewData["Title"] = Model.Leaderboard.LevelName;
 	var BestEntry = Model.LeaderboardEntries.First();
 	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank != 1);
-	var HeaderHeightPX = 400;
+	var HeaderHeightPX = 450;
 	var TabHeightPX = 20;
 }
 
@@ -26,6 +26,20 @@
 		margin: 20px;
 		padding: 10px;
 	}
+
+	.fit-content {
+		width: fit-content;
+		margin: auto;
+	}
+
+	table.table.custom-scrollbar {
+		margin-bottom: 0px;
+	}
+
+	a, a:hover, a:visited, a:active {
+		color: inherit;
+		text-decoration: none;
+	}
 </style>
 
 <script>
@@ -38,27 +52,37 @@ $('#pills-tab a').on('click', function (e) {
 <div class="text-center fade-in" style="margin-left: 15px; margin-right: 15px;">
 	
 	<div style="margin-bottom: 50px; margin-top: 30px;" class="row">
-		<div class="col-12">
-			<h1 class="display-4 stroke">@Model.Leaderboard.LevelName</h1>
+		<div class="col-12 mb-3">
+			<h1 class="display-4 info-card rounded-corners-large fit-content box-shadow">
+				@Model.Leaderboard.LevelName 
+				<a target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id=@Model.Leaderboard.WorkshopFileID"><i class="fab fa-steam"></i></a>
+			</h1>
 		</div>
 		<div class="col-3">
-			<h5 class="stroke">Leader</h5>
-			<h2 class="stroke"><img src="@await BestEntry.Player.GetSteamAvatar(steamDAL, playerDAL, "_medium")" /> @BestEntry.Player.Name</h2>
+			<div class="info-card rounded-corners-large fit-content box-shadow">
+				<h5>Leader</h5>
+				<h2><img src="@await BestEntry.Player.GetSteamAvatar(steamDAL, playerDAL, "_medium")" /> @BestEntry.Player.Name</h2>
+			</div>
 		</div>
 		<div class="col-3">
-			<h5 class="stroke">Record Age</h5>
-			<h2 class="stroke">@Formatter.TimeAgoFromUnixTime(BestEntry.UpdatedTimeUTC)</h2>
+			<div class="info-card rounded-corners-large fit-content box-shadow">
+				<h5>Record Age</h5>
+				<h2>@Formatter.TimeAgoFromUnixTime(BestEntry.UpdatedTimeUTC)</h2>
+			</div>
 		</div>
 		<div class="col-3">
-			<h5 class="stroke">World Record</h5>
-			<h2 class="stroke">@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+			<div class="info-card rounded-corners-large fit-content box-shadow">
+				<h5>World Record</h5>
+				<h2>@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+			</div>
 		</div>
 		<div class="col-3">
-			<h5 class="stroke">World Record Gap</h5>
-			<h2 class="stroke">@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+			<div class="info-card rounded-corners-large fit-content box-shadow">
+				<h5>World Record Gap</h5>
+				<h2>@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+			</div>
 		</div>
 	</div>
-	<div class="divider"></div>
 	<div class="row">
 		<div class="col-3 offset-1">
 			<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
@@ -66,38 +90,38 @@ $('#pills-tab a').on('click', function (e) {
 					<a class="nav-link active stroke" id="pills-home-tab" data-toggle="pill" href="#pills-info" role="tab">Level Info</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link stroke" id="pills-profile-tab" data-toggle="pill" href="#pills-improvements" role="tab">Recent Improvements</a>
+					<a class="nav-link stroke" id="pills-profile-tab" data-toggle="pill" href="#pills-improvements" role="tab">Improvements</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link stroke" id="pills-contact-tab" data-toggle="pill" href="#pills-sightings" role="tab">Recent First Sightings</a>
+					<a class="nav-link stroke" id="pills-contact-tab" data-toggle="pill" href="#pills-sightings" role="tab">First Sightings</a>
 				</li>
 			</ul>
 			<div class="tab-content" id="pills-tabContent">
 				<div class="tab-pane fade show active" id="pills-info" role="tabpanel">
 					<div class="row">
-						<div class="col-5 level-medal-times box-shadow">
+						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
 							<div class="medal-diamond medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
+							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times box-shadow">
+						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
 							<div class="medal-gold medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.GoldTime)</h2>
+							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.GoldTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times box-shadow">
+						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
 							<div class="medal-silver medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.SilverTime)</h2>
+							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.SilverTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times box-shadow">
+						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
 							<div class="medal-bronze medal-medium" style="margin-bottom: 5px;">
 								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
 							</div>
-							<h2 class="stroke">@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
+							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
 						</div>
 					</div>
 				</div>
@@ -163,7 +187,7 @@ $('#pills-tab a').on('click', function (e) {
 				<table class="table table-striped table-dark sticky-headers custom-scrollbar">
 					<thead>
 						<tr>
-							<th class="text-left" width="100">Rank</th>
+							<th class="text-left" width="100" style="z-index: 1">Rank</th>
 							<th class="text-left">Player</th>
 							<th>Points</th>
 							<th>Rating</th>
