@@ -10,6 +10,7 @@ namespace DistanceTracker.Models
 		public ulong SteamID { get; set; }
 		public string Name { get; set; }
 		public string SteamAvatar { get; set; }
+		public string SteamBackground { get; set; }
 
 		public async Task<string> GetSteamAvatar(SteamDAL steamDAL, PlayerDAL playerDAL, string suffix = null)
 		{

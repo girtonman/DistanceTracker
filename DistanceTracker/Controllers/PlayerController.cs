@@ -187,10 +187,12 @@ namespace DistanceTracker.Controllers
 		{
 			var players = await SteamDAL.GetPlayerSummaries(steamID);
 			var player = players.FirstOrDefault();
+			var background = await SteamDAL.GetProfileBackground(steamID);
 			if (player != null)
 			{
 				await PlayerDAL.UpdateSteamAvatar(steamID, player.Avatar);
 				await PlayerDAL.UpdateSteamName(steamID, player.PersonaName);
+				await PlayerDAL.UpdateSteamBackground(steamID, background);
 			}
 
 			return RedirectToAction("Index", new { steamID = steamID });

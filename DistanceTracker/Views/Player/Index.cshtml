@@ -24,6 +24,18 @@
 	.level-card .card {
 		background-color: #212529;
 	}
+
+	#backgroundVideo {
+		position: fixed;
+		@* left: 50%;
+		transform: translateX(-50%);
+		width: 100%; *@
+		right: 0;
+		top: 0px;
+		min-width: 100%;
+		min-height: 100%;
+		z-index: -1;
+	}
 </style>
 
 <script>
@@ -365,6 +377,10 @@
 	};
 
 </script>
+
+<video autoplay muted loop id="backgroundVideo" poster="@Model.SteamBackground">
+	<source src="@Model.SteamBackground" type="video/webm">
+</video>
 
 <div class="text-center fade-in container">
 	<div class="row">
