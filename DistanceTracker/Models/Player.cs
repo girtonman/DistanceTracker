@@ -34,7 +34,7 @@ namespace DistanceTracker.Models
 				}
 			}
 
-			if (string.IsNullOrEmpty(suffix))
+			if (string.IsNullOrEmpty(suffix) || SteamAvatar.EndsWith(".gif"))
 			{
 				return SteamAvatar;
 			}
