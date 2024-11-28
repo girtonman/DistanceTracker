@@ -9,7 +9,7 @@
 		{
 			get
 			{
-				return Formatter.TimeFromMs(Milliseconds);
+				return Leaderboard.LevelType == LevelType.Stunt ? Formatter.ElectronVolts(Milliseconds) : Formatter.TimeFromMs(Milliseconds);
 			}
 		}
 		public ulong SteamID { get; set; }

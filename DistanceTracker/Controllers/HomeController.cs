@@ -30,7 +30,7 @@ namespace DistanceTracker.Controllers
 			return View(siteStats);
 		}
 
-		public IActionResult GlobalActivity() => View();
+		public IActionResult ActivityFeed() => View();
 
 		public async Task<IActionResult> GetGlobalRecentActivity(ulong? after = null)
 		{

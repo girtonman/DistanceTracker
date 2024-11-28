@@ -12,14 +12,14 @@
 		{
 			get
 			{
-				return Formatter.TimeFromMs(NewMilliseconds);
+				return Leaderboard.LevelType == LevelType.Stunt ? Formatter.ElectronVolts(NewMilliseconds) : Formatter.TimeFromMs(NewMilliseconds);
 			}
 		}
 		public string TimeImprovement
 		{
 			get
 			{
-				return Formatter.TimeFromMs(OldMilliseconds - NewMilliseconds);
+				return Leaderboard.LevelType == LevelType.Stunt ? Formatter.ElectronVolts(NewMilliseconds - OldMilliseconds) : Formatter.TimeFromMs(OldMilliseconds - NewMilliseconds);
 			}
 		}
 		public uint OldRank { get; set; }

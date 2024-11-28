@@ -1,13 +1,13 @@
 ﻿@{
-	ViewData["Title"] = "Global Activity";
+	ViewData["Title"] = "World Record Activity";
 }
 
 <script>
 	jQuery(function () {
-		getGlobalRecentActivity();
+		getWRActivity();
 	});
 
-	function getGlobalRecentActivity() {
+	function getWRActivity() {
 		$.ajax({
 			url: '/Home/GetWRActivity',
 			method: 'GET',
@@ -83,7 +83,7 @@
 						<th class="text-left">Player</th>
 						<th class="text-left">Track</th>
 						<th style="width: 200px">Rank</th>
-						<th style="width: 200px">Time</th>
+						<th style="width: 200px">Time/Score</th>
 						<th style="width: 200px">When</th>
 					</tr>
 				</thead>

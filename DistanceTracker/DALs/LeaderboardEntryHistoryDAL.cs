@@ -32,7 +32,8 @@ namespace DistanceTracker.DALs
 					NewRank,
 					UpdatedTimeUTC,
 					p.SteamAvatar,
-					l.ImageURL
+					l.ImageURL,
+					l.LevelType
 				FROM LeaderboardEntryHistory leh
 				LEFT JOIN Leaderboards l on l.ID = leh.LeaderboardID
 				LEFT JOIN Players p on p.SteamID = leh.SteamID";
@@ -93,6 +94,7 @@ namespace DistanceTracker.DALs
 					ID = leh.LeaderboardID,
 					LevelName = reader.GetString(1),
 					ImageURL = reader.GetString(11),
+					LevelType = (LevelType)reader.GetUInt32(12),
 				};
 				leh.Player = new Player()
 				{

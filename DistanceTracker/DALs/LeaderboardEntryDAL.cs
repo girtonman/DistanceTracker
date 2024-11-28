@@ -46,7 +46,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = @$"
-				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL FROM LeaderboardEntries le 
+				SELECT le.LeaderboardID, l.LevelName, Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL, l.LevelType FROM LeaderboardEntries le 
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID 
 				LEFT JOIN Players p on p.SteamID = le.SteamID ";
 
@@ -98,6 +98,7 @@ namespace DistanceTracker.DALs
 					ID = le.LeaderboardID,
 					LevelName = reader.GetString(1),
 					ImageURL = reader.GetString(8),
+					LevelType = (LevelType)reader.GetUInt32(9),
 				};
 				le.Player = new Player()
 				{
