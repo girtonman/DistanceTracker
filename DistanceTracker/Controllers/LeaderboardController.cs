@@ -145,11 +145,11 @@ namespace DistanceTracker.Controllers
 			return View(viewModel);
 		}
 
-		public IActionResult Levels() => View();
+		public IActionResult Levels(string q) => View("Levels", q);
 
-		public async Task<IActionResult> GetLevels()
+		public async Task<IActionResult> SearchLevels(string q = null)
 		{
-			var levels = await LeaderDAL.GetLevels();
+			var levels = await LeaderDAL.SearchLevels(q);
 			var levelSetOrder = new Dictionary<string, int>()
 			{
 				{ "Ignition", 1},

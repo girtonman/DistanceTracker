@@ -110,11 +110,11 @@ namespace DistanceTracker.DALs
 			return leaderboards;
 		}
 
-		public async Task<List<Level>> GetLevels()
+		public async Task<List<Level>> SearchLevels(string search)
 		{
 			Connection.Open();
 
-			var sql = @"SELECT
+			var sql = $@"SELECT
 			lb.ID,
 			lb.LevelName,
 			lb.ImageURL,
@@ -144,9 +144,17 @@ namespace DistanceTracker.DALs
 				FROM LeaderboardEntryHistory AS lbeh
 				GROUP BY lbeh.LeaderboardID
 			) RecentImprovements ON lb.ID = RecentImprovements.LeaderboardID
+			{(string.IsNullOrEmpty(search) ? 
+				"WHERE lb.IsOfficial = 1 ORDER BY lb.ID" : 
+				"WHERE lb.LevelName LIKE @search ORDER BY EntryCount DESC LIMIT 100"
+			)}
 			";
 
 			var command = new MySqlCommand(sql, Connection);
+			if(!string.IsNullOrEmpty(search))
+			{
+				command.Parameters.AddWithValue("@search", $"%{search}%");
+			}
 			var reader = await command.ExecuteReaderAsync();
 
 			var levels = new List<Level>();
