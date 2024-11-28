@@ -494,7 +494,7 @@ namespace DistanceTracker.DALs
 			return rankedEntries;
 		}
 
-		public async Task<List<RankedLeaderboardEntry>> GetRankedLeaderboardEntriesForLevel(uint leaderboardID)
+		public async Task<List<RankedLeaderboardEntry>> GetRankedLeaderboardEntriesForLevel(uint leaderboardID, bool reverse = false)
 		{
 			Connection.Open();
 			var sql = $@"
@@ -512,7 +512,7 @@ namespace DistanceTracker.DALs
 						*,
 						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 					FROM(
-							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds ASC) as `Rank`, FirstSeenTimeUTC, UpdatedTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
+							SELECT Milliseconds, SteamID, RANK() OVER(ORDER BY Milliseconds {(reverse ? "DESC" : "ASC")}) as `Rank`, FirstSeenTimeUTC, UpdatedTimeUTC FROM LeaderboardEntries WHERE LeaderboardID = {leaderboardID}
 					) ranks
 				) le
 				LEFT JOIN Players p ON p.SteamID = le.SteamID

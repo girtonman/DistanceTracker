@@ -24,6 +24,11 @@ namespace DistanceTracker
 			return output;
 		}
 
+		public static string ElectronVolts(ulong milliseconds)
+		{
+			return $"{milliseconds:n0} eV";
+		}
+
 		public static string TimeAgoFromUnixTime(ulong timestamp)
 		{
 			var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

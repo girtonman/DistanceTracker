@@ -22,9 +22,12 @@
 	}
 
 	.level-medal-times {
-		background: #222;
-		margin: 20px;
 		padding: 10px;
+	}
+
+	.level-medal-times > div {
+		background: #222;
+		padding: 20px;
 	}
 
 	.fit-content {
@@ -73,13 +76,27 @@ $('#pills-tab a').on('click', function (e) {
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>World Record</h5>
-				<h2>@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+				@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+				{
+					<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds)</h2>
+				}
+				else
+				{
+					<h2>@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+				}
 			</div>
 		</div>
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>World Record Gap</h5>
-				<h2>@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+				@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+				{
+					<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds-SecondBestEntry.Milliseconds)</h2>
+				}
+				else
+				{
+					<h2>@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+				}
 			</div>
 		</div>
 	</div>
@@ -99,29 +116,65 @@ $('#pills-tab a').on('click', function (e) {
 			<div class="tab-content" id="pills-tabContent">
 				<div class="tab-pane fade show active" id="pills-info" role="tabpanel">
 					<div class="row">
-						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
-							<div class="medal-diamond medal-medium" style="margin-bottom: 5px;">
-								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+						<div class="col-6 level-medal-times">
+							<div class="rounded-corners-large box-shadow">
+								<div class="medal-diamond medal-medium" style="margin-bottom: 5px;">
+									<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+								</div>
+								@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+								{
+									<h2>@Formatter.ElectronVolts(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
+								}
+								else
+								{
+									<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
+								}
 							</div>
-							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.DiamondTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
-							<div class="medal-gold medal-medium" style="margin-bottom: 5px;">
-								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+						<div class="col-6 level-medal-times">
+							<div class="rounded-corners-large box-shadow">
+								<div class="medal-gold medal-medium" style="margin-bottom: 5px;">
+									<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+								</div>
+								@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+								{
+									<h2>@Formatter.ElectronVolts(Model.Leaderboard.MedalTimes.GoldTime)</h2>
+								}
+								else
+								{
+									<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.GoldTime)</h2>
+								}
 							</div>
-							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.GoldTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
-							<div class="medal-silver medal-medium" style="margin-bottom: 5px;">
-								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+						<div class="col-6 level-medal-times">
+							<div class="rounded-corners-large box-shadow">
+								<div class="medal-silver medal-medium" style="margin-bottom: 5px;">
+									<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+								</div>
+								@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+								{
+									<h2>@Formatter.ElectronVolts(Model.Leaderboard.MedalTimes.SilverTime)</h2>
+								}
+								else
+								{
+									<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.SilverTime)</h2>
+								}
 							</div>
-							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.SilverTime)</h2>
 						</div>
-						<div class="col-5 level-medal-times rounded-corners-large box-shadow">
-							<div class="medal-bronze medal-medium" style="margin-bottom: 5px;">
-								<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+						<div class="col-6 level-medal-times">
+							<div class="rounded-corners-large box-shadow">
+								<div class="medal-bronze medal-medium" style="margin-bottom: 5px;">
+									<div class="medal-mask"></div><img src="/images/medals/medal_loog.png" />
+								</div>
+								@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+								{
+									<h2>@Formatter.ElectronVolts(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
+								}
+								else
+								{
+									<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
+								}
 							</div>
-							<h2>@Formatter.TimeFromMs(Model.Leaderboard.MedalTimes.BronzeTime)</h2>
 						</div>
 					</div>
 				</div>
@@ -132,7 +185,7 @@ $('#pills-tab a').on('click', function (e) {
 								<tr>
 									<th class="text-left">Player</th>
 									<th class="text-left">Rank</th>
-									<th>Time</th>
+									<th>@(@Model.Leaderboard.LevelType == LevelType.Stunt ? "Score" : "Time")</th>
 									<th>When</th>
 								</tr>
 							</thead>
@@ -145,7 +198,14 @@ $('#pills-tab a').on('click', function (e) {
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
 										<td class="text-left">@entry.NewRank ( <i class="fas fa-arrow-up fa-sm text-success"></i> @(entry.OldRank - entry.NewRank) )</td>
-										<td>@Formatter.TimeFromMs(entry.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.TimeFromMs(entry.OldMilliseconds-entry.NewMilliseconds) )</td>
+										@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+										{
+											<td>@Formatter.ElectronVolts(entry.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.ElectronVolts(entry.NewMilliseconds-entry.OldMilliseconds) )</td>
+										}
+										else
+										{
+											<td>@Formatter.TimeFromMs(entry.NewMilliseconds) ( <i class="fas fa-arrow-up fa-sm text-success"></i> @Formatter.TimeFromMs(entry.OldMilliseconds-entry.NewMilliseconds) )</td>
+										}
 										<td>@Formatter.TimeAgoFromUnixTime(entry.UpdatedTimeUTC)</td>
 									</tr>
 								}
@@ -159,7 +219,7 @@ $('#pills-tab a').on('click', function (e) {
 							<thead>
 								<tr>
 									<th class="text-left">Player</th>
-									<th>Time</th>
+									<th>@(@Model.Leaderboard.LevelType == LevelType.Stunt ? "Score" : "Time")</th>
 									<th>When</th>
 								</tr>
 							</thead>
@@ -171,7 +231,14 @@ $('#pills-tab a').on('click', function (e) {
 											<img src="@await entry.Player.GetSteamAvatar(steamDAL, playerDAL)" />
 											<a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a>
 										</td>
-										<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
+										@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+										{
+											<td>@Formatter.ElectronVolts(entry.Milliseconds)</td>
+										}
+										else
+										{
+											<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
+										}
 										<td>@Formatter.TimeAgoFromUnixTime(entry.FirstSeenTimeUTC)</td>
 									</tr>
 								}
@@ -191,7 +258,7 @@ $('#pills-tab a').on('click', function (e) {
 							<th class="text-left">Player</th>
 							<th>Points</th>
 							<th>Rating</th>
-							<th>Time</th>
+							<th>@(@Model.Leaderboard.LevelType == LevelType.Stunt ? "Score" : "Time")</th>
 							<th>Delta</th>
 						</tr>
 					</thead>
@@ -212,8 +279,16 @@ $('#pills-tab a').on('click', function (e) {
 								</td>
 								<td>@entry.NoodlePoints.ToString("0")</td>
 								<td>@entry.PlayerRating.ToString("0.00")</td>
-								<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
-								<td>+@Formatter.TimeFromMs(entry.Milliseconds - BestEntry.Milliseconds)</td>
+								@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+								{
+									<td>@Formatter.ElectronVolts(entry.Milliseconds)</td>
+									<td>-@Formatter.ElectronVolts(BestEntry.Milliseconds - entry.Milliseconds)</td>
+								}
+								else
+								{
+									<td>@Formatter.TimeFromMs(entry.Milliseconds)</td>
+									<td>+@Formatter.TimeFromMs(entry.Milliseconds - BestEntry.Milliseconds)</td>
+								}
 							</tr>
 						}
 					</tbody>

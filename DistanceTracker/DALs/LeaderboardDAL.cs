@@ -19,25 +19,29 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"SELECT ID, LevelName, LeaderboardName, IsOfficial, ImageURL, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
+			var sql = $"SELECT ID, LevelName, ImageURL, LeaderboardName, IsOfficial, WorkshopFileID, Tags, LevelType, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
 			Leaderboard leaderboard = null;
 			while (reader.Read())
 			{
-				var bronzeTime = reader.IsDBNull(5) ? 0 : reader.GetUInt32(5);
-				var silverTime = reader.IsDBNull(6) ? 0 : reader.GetUInt32(6);
-				var goldTime = reader.IsDBNull(7) ? 0 : reader.GetUInt32(7);
-				var diamondTime = reader.IsDBNull(8) ? 0 : reader.GetUInt32(8);
+				var bronzeTime = reader.IsDBNull(8) ? 0 : reader.GetUInt32(8);
+				var silverTime = reader.IsDBNull(9) ? 0 : reader.GetUInt32(9);
+				var goldTime = reader.IsDBNull(10) ? 0 : reader.GetUInt32(10);
+				var diamondTime = reader.IsDBNull(11) ? 0 : reader.GetUInt32(11);
 
 				leaderboard = new Leaderboard()
 				{
 					ID = reader.GetUInt32(0),
 					LevelName = reader.GetString(1),
-					LeaderboardName = reader.GetString(2),
-					IsOfficial = reader.GetBoolean(3),
-					ImageURL = reader.GetString(4),
+					ImageURL = reader.GetString(2),
+					LeaderboardName = reader.GetString(3),
+					IsOfficial = reader.GetBoolean(4),
+					WorkshopFileID = reader.IsDBNull(5) ? (uint?)null : reader.GetUInt32(5),
+					Tags = reader.IsDBNull(6) ? "" : reader.GetString(6),
+					LevelType = (LevelType)reader.GetUInt32(7),
+
 					MedalTimes = new MapMedalTimes(diamondTime, goldTime, silverTime, bronzeTime),
 				};
 			}

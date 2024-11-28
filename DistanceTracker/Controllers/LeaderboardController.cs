@@ -128,10 +128,11 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> Level(uint leaderboardID)
 		{
-			var leaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID);
+			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
+
+			var leaderboardEntries = await EntryDAL.GetRankedLeaderboardEntriesForLevel(leaderboardID, leaderboard.IsReverseRankOrder);
 			var recentNewSightings = await EntryDAL.GetRecentFirstSightings(numRows: 30, leaderboardIDs: new List<uint>() { leaderboardID });
 			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 30, leaderboardIDs: new List<uint>() { leaderboardID });
-			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
 
 			var viewModel = new LeaderboardViewModel()
 			{
