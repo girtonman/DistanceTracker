@@ -176,8 +176,8 @@ namespace DistanceTracker.DALs
 				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ?
 					(level.NewestTimeUTC.HasValue
 						? System.Math.Max(level.NewestTimeUTC.Value, level.NewestImprovementUTC.Value)
-						: level.NewestTimeUTC)
-					: null;
+						: level.NewestImprovementUTC)
+					: level.NewestTimeUTC;
 
 				levels.Add(level);
 			}
