@@ -108,7 +108,8 @@ namespace DistanceTracker.Controllers
 			{
 				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboardIDs),
 				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(leaderboardIDs),
-				OptimalTotalTime = await EntryDAL.GetOptimalTotalTime(leaderboardIDs),
+				OptimalTotalTime = await EntryDAL.GetOptimalTotal(leaderboardIDs),
+				OptimalTotalStuntScore = await EntryDAL.GetOptimalTotal(leaderboardIDs, true),
 				WRLog = await HistoryDAL.GetWRLog(leaderboardIDs: leaderboardIDs),
 			};
 
@@ -119,7 +120,8 @@ namespace DistanceTracker.Controllers
 				var steamID = entry.Player.SteamID;
 				if (globalTimeImprovements.ContainsKey(steamID))
 				{
-					entry.LastWeeksTimeImprovement = globalTimeImprovements[steamID];
+					entry.LastWeeksTimeImprovement = globalTimeImprovements[steamID].Item1;
+					entry.LastWeeksScoreImprovement = globalTimeImprovements[steamID].Item2;
 				}
 			}
 

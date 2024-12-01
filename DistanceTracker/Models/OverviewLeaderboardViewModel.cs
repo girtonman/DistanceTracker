@@ -11,6 +11,7 @@ namespace DistanceTracker.Models
 		public List<OverviewRankedLeaderboardEntry> LeaderboardEntries { get; set; }
 		public List<LeaderboardEntryHistory> WRLog { get; set; }
 		public ulong OptimalTotalTime { get; set; }
+		public ulong OptimalTotalStuntScore { get; set; }
 		public ulong LastWeeksTimeImprovement { get; set; }
 		public Event EventDetails { get; set; }
 		public Player FirstPlace { get => LeaderboardEntries.Count > 0 ? LeaderboardEntries[0].Player : null; }

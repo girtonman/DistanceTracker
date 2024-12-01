@@ -134,7 +134,8 @@ namespace DistanceTracker.DALs
 						  ORDER BY SUM(NoodlePoints) DESC
 						) as GlobalRank,
 						SUM(NoodlePoints) AS NoodlePoints,
-						SUM(Milliseconds) AS Milliseconds,
+						SUM(IF(l.LevelType <> 2, Milliseconds, 0)) AS Milliseconds,
+						SUM(IF(l.LevelType = 2, Milliseconds, 0)) AS StuntScore,
 						COUNT(*) AS NumTracksCompleted
 					FROM(
 						SELECT
@@ -145,6 +146,7 @@ namespace DistanceTracker.DALs
 								WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)})
 						) ranks
 					) le
+					LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
 					GROUP BY SteamID
 					ORDER BY SUM(NoodlePoints) DESC
 					LIMIT {numRows}
@@ -161,14 +163,15 @@ namespace DistanceTracker.DALs
 					Rank = reader.GetInt32(1),
 					NoodlePoints = reader.GetDouble(2),
 					TotalMilliseconds = reader.GetUInt64(3),
-					NumTracksCompleted = reader.GetUInt32(4),
-					PlayerRating = reader.GetDouble(5),
+					TotalStuntScore = reader.GetUInt64(4),
+					NumTracksCompleted = reader.GetUInt32(5),
+					PlayerRating = reader.GetDouble(6),
 				};
 				grle.Player = new Player()
 				{
 					SteamID = reader.GetUInt64(0),
-					Name = reader.GetString(6),
-					SteamAvatar = reader.IsDBNull(7) ? null : reader.GetString(7),
+					Name = reader.GetString(7),
+					SteamAvatar = reader.IsDBNull(8) ? null : reader.GetString(8),
 				};
 				globalLeaderboardEntries.Add(grle);
 			}
@@ -266,42 +269,48 @@ namespace DistanceTracker.DALs
 			return maxEntries > 0 ? maxEntries : 1; // return 1 for safety from divide by zeroes later
 		}
 
-		public async Task<ulong> GetOptimalTotalTime(List<uint> leaderboardIDs)
+		public async Task<ulong> GetOptimalTotal(List<uint> leaderboardIDs, bool isStunt = false)
 		{
-			var whereClause = "";
+			string innerWhereClause;
 			if (leaderboardIDs.Count > 0)
 			{
-				whereClause = $"WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
+				innerWhereClause = $"WHERE LeaderboardID IN ({string.Join(",", leaderboardIDs)})";
 			}
 			else
 			{
+				// no point in querying if there are no leaderboards specified
 				return 0;
 			}
+
+			// Filter based on stunt flag
+			string outerWhereClause = isStunt ? "WHERE l.LevelType = 2" : "WHERE l.LevelType <> 2";
 
 			Connection.Open();
 			var sql = @$"
 				SELECT
-					SUM(le.MinMilliseconds)
+					SUM(le.OptimalMilliseconds)
 				FROM Leaderboards l
 				LEFT JOIN (
 					SELECT
 						LeaderboardID,
-						MIN(Milliseconds) AS MinMilliseconds
+						{(isStunt ? "MAX(Milliseconds) AS OptimalMilliseconds" : "MIN(Milliseconds) AS OptimalMilliseconds")}
 					FROM LeaderboardEntries
-					{whereClause}
+					{innerWhereClause}
 					GROUP BY LeaderboardID
-				) le ON le.LeaderboardID = l.ID";
+				) le ON le.LeaderboardID = l.ID
+				{outerWhereClause}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
+			ulong optimalTotal = 0;
 			while (reader.Read())
 			{
-				return reader.GetUInt64(0);
+				optimalTotal = reader.IsDBNull(0) ? 0 : reader.GetUInt64(0);
 			}
 			reader.Close();
 			Connection.Close();
 
-			return 0;
+			return optimalTotal;
 		}
 
 		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID, List<uint> leaderboardIDs)
@@ -739,7 +748,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 			var sql = @$"
-				SELECT le.LeaderboardID, l.LevelName, le.Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL
+				SELECT le.LeaderboardID, l.LevelName, le.Milliseconds, le.SteamID, p.Name, le.FirstSeenTimeUTC, le.UpdatedTimeUTC, p.SteamAvatar, l.ImageURL, l.LevelType
 				FROM (SELECT LeaderboardID, MIN(Milliseconds) AS Milliseconds FROM LeaderboardEntries GROUP BY LeaderboardID) WR
 				LEFT JOIN LeaderboardEntries le ON WR.LeaderboardID = le.LeaderboardID AND WR.Milliseconds = le.Milliseconds
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID
@@ -765,6 +774,7 @@ namespace DistanceTracker.DALs
 					ID = le.LeaderboardID,
 					LevelName = reader.GetString(1),
 					ImageURL = reader.GetString(8),
+					LevelType = (LevelType) reader.GetUInt32(9),
 				};
 				le.Player = new Player()
 				{

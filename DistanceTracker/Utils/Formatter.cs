@@ -26,6 +26,11 @@ namespace DistanceTracker
 
 		public static string ElectronVolts(ulong milliseconds)
 		{
+			return ElectronVolts((long)milliseconds);
+		}
+
+		public static string ElectronVolts(long milliseconds)
+		{
 			return $"{milliseconds:n0} eV";
 		}
 
