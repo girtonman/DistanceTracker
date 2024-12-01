@@ -33,14 +33,14 @@ namespace DistanceTracker.DALs
 
 
 			var siteStats = new SiteStats();
-			while(reader.Read())
+			while (reader.Read())
 			{
 				siteStats.PlayerCount = reader.GetInt32(0);
 				siteStats.LeaderboardEntryCount = reader.GetInt32(1);
 				siteStats.ImprovementCount = reader.GetInt32(2);
 				siteStats.LeaderboardCount = reader.GetInt32(3);
 
-				
+
 				var updatedEntryTime = reader.GetUInt64(4);
 				var updatedImprovementTime = reader.GetUInt64(5);
 				var updatedTime = updatedEntryTime > updatedImprovementTime ? updatedEntryTime : updatedImprovementTime;

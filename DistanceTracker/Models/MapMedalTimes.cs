@@ -17,15 +17,15 @@
 
 		public string GetMedalCSS(ulong milliseconds)
 		{
-			if(milliseconds < DiamondTime)
+			if (milliseconds < DiamondTime)
 			{
 				return "medal-diamond";
 			}
-			if(milliseconds < GoldTime)
+			if (milliseconds < GoldTime)
 			{
 				return "medal-gold";
 			}
-			if(milliseconds < SilverTime)
+			if (milliseconds < SilverTime)
 			{
 				return "medal-silver";
 			}

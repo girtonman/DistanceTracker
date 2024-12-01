@@ -360,3 +360,20 @@ hr {
 .fa-xxs {
 	font-size: 0.85rem;
 }
+
+.profile-thumb {
+	height: 32px;
+}
+
+.info-card {
+	background-color: #212529;
+	padding: 15px;
+}
+
+.rounded-corners {
+	border-radius: 0.25rem;
+}
+
+.rounded-corners-large {
+	border-radius: 0.5rem;
+}

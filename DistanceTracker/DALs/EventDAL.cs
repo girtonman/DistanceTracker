@@ -23,12 +23,12 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			while(reader.Read())
+			while (reader.Read())
 			{
 				eventDetails.ID = reader.GetUInt32(0);
 				eventDetails.Name = reader.GetString(1);
-				eventDetails.StartTimeUTC = reader.IsDBNull(2) ? (ulong?) null : reader.GetUInt64(2);
-				eventDetails.EndTimeUTC = reader.IsDBNull(3) ? (ulong?) null : reader.GetUInt64(3);
+				eventDetails.StartTimeUTC = reader.IsDBNull(2) ? (ulong?)null : reader.GetUInt64(2);
+				eventDetails.EndTimeUTC = reader.IsDBNull(3) ? (ulong?)null : reader.GetUInt64(3);
 				eventDetails.EventBackgroundImageURL = reader.GetString(4);
 			}
 
@@ -45,7 +45,7 @@ namespace DistanceTracker.DALs
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
-			while(reader.Read())
+			while (reader.Read())
 			{
 				leaderboardIDs.Add(reader.GetUInt32(0));
 			}

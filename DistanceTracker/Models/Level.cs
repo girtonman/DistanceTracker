@@ -7,7 +7,7 @@ namespace DistanceTracker.Models
 		public string ImageURL { get; set; }
 		public string LeaderboardName { get; set; }
 		public bool IsOfficial { get; set; }
-		public ulong SteamLeaderboardID { get; set; }
+		public ulong? SteamLeaderboardID { get; set; }
 		public string LevelSet { get; set; }
 		public uint? EntryCount { get; set; }
 		public ulong? NewestTimeUTC { get; set; }

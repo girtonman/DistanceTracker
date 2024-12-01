@@ -24,17 +24,27 @@ namespace DistanceTracker
 			return output;
 		}
 
+		public static string ElectronVolts(ulong milliseconds)
+		{
+			return ElectronVolts((long)milliseconds);
+		}
+
+		public static string ElectronVolts(long milliseconds)
+		{
+			return $"{milliseconds:n0} eV";
+		}
+
 		public static string TimeAgoFromUnixTime(ulong timestamp)
 		{
 			var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-			var diff = currentTimestamp - (long) timestamp;
+			var diff = currentTimestamp - (long)timestamp;
 
 			var seconds = diff / 1000;
 			var minutes = seconds / 60;
 			var hours = minutes / 60;
 			var days = hours / 24;
 
-			if(days > 0)
+			if (days > 0)
 			{
 				return days > 1 ? $"{days} days ago" : $"{days} day ago";
 			}
@@ -48,7 +58,7 @@ namespace DistanceTracker
 			}
 			else
 			{
-				if(seconds == 0)
+				if (seconds == 0)
 				{
 					return "Just now";
 				}

@@ -76,25 +76,38 @@
 	};
 </script>
 
-<div class="text-center">
+<div class="container text-center" style="max-width: 1800px">
 	<div class="row">
-		<div class="col">
+		<div class="col-12 col-xl-3"></div>
+		@if (Model.HasTimeScores)
+		{
+		<div class="col-6 col-xl">
 			<h5>Optimal Total Time</h5>
 			<h2 style="margin-bottom: 1px; margin-top: -6px;">@Formatter.TimeFromMs(Model.OptimalTotalTime)</h2>
 		</div>
+		}
+		@if (Model.HasStuntScores)
+		{
+		<div class="col-6 col-xl">
+			<h5>Optimal Total Stunt Score</h5>
+			<h2 style="margin-bottom: 1px; margin-top: -6px;">@Formatter.ElectronVolts(Model.OptimalTotalStuntScore)</h2>
+		</div>
+		}
+		<div class="col-12 col-xl-3"></div>
 	</div>
 
 	<hr />
 
 	<div class="row">
-		<div class="col-8">
-			<h4 class="text-left">Global Leaderboard (Official Sprints)</h4>
+		<div class="col-12 col-xl-7">
+			<h4 class="text-left">@Model.LeaderboardName</h4>
 			<table class="table table-striped table-dark">
 				<thead>
 					<tr>
 						<th class="text-left">Rank</th>
 						<th class="text-left">Player</th>
-						<th>Total Time</th>
+						@Html.Raw(Model.HasTimeScores ? "<th>Total Time</th>" : "")
+						@Html.Raw(Model.HasStuntScores ? "<th>Total Score</th>" : "")
 						<th># Tracks Completed</th>
 						<th>Points</th>
 						<th>Rating</th>
@@ -106,6 +119,8 @@
 						<tr>
 							<td class="text-left">@entry.Rank</td>
 							<td class="text-left"><a class="link" href="/Player?steamID=@entry.Player.SteamID">@entry.Player.Name</a></td>
+							@if (Model.HasTimeScores)
+							{
 							<td>
 								@Formatter.TimeFromMs(entry.TotalMilliseconds)
 								@if(entry.LastWeeksTimeImprovement > 0)
@@ -113,6 +128,17 @@
 									@Html.Raw($"( <i class=\"fas fa-arrow-up fa-sm text-success\"></i> {Formatter.TimeFromMs(entry.LastWeeksTimeImprovement)} )")
 								}
 							</td>
+							}
+							@if (Model.HasStuntScores)
+							{
+							<td>
+								@Formatter.ElectronVolts(entry.TotalStuntScore)
+								@if(entry.LastWeeksScoreImprovement > 0)
+								{
+									@Html.Raw($"( <i class=\"fas fa-arrow-up fa-sm text-success\"></i> {Formatter.ElectronVolts(entry.LastWeeksScoreImprovement)} )")
+								}
+							</td>
+							}
 							<td>@entry.NumTracksCompleted</td>
 							<td>@entry.NoodlePoints.ToString("0")</td>
 							<td>@entry.PlayerRating.ToString("0.00")</td>
@@ -121,7 +147,7 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="col-4">
+		<div class="col-12 col-xl-5">
 			<canvas id="winnersCircle" style="margin-bottom: 15px;margin-top: 15px;"></canvas>
 			<h4 class="text-left"># First Place Records</h4>
 			<table class="table table-striped table-dark">
@@ -148,7 +174,7 @@
 					<tr>
 						<th class="text-left">Player</th>
 						<th class="text-left">Track</th>
-						<th>Time</th>
+						@Html.Raw(Model.HasTimeScores ? Model.HasStuntScores ? "<th>Time/Score</th>" : "<th>Time</th>" : "<th>Score</th>")
 						<th>When</th>
 					</tr>
 				</thead>

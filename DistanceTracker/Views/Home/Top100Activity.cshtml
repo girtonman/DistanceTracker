@@ -4,10 +4,10 @@
 
 <script>
 	jQuery(function () {
-		getGlobalRecentActivity();
+		getTop100RecentActivity();
 	});
 
-	function getGlobalRecentActivity() {
+	function getTop100RecentActivity() {
 		$.ajax({
 			url: '/Home/GetTop100RecentActivity',
 			method: 'GET',
@@ -83,7 +83,7 @@
 						<th class="text-left">Player</th>
 						<th class="text-left">Track</th>
 						<th style="width: 200px">Rank</th>
-						<th style="width: 200px">Time</th>
+						<th style="width: 200px">Time/Score</th>
 						<th style="width: 200px">When</th>
 					</tr>
 				</thead>

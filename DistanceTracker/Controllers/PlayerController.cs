@@ -33,11 +33,14 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetGlobalStats(ulong steamID)
 		{
-			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID);
+			var officialLeaderboards = await LeaderDAL.GetLeaderboards(true);
+			var officalLeaderboardIDs = officialLeaderboards.Select(x => x.ID).ToList();
 
-			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID);
+			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID, officalLeaderboardIDs);
+
+			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID, officalLeaderboardIDs);
 			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
-			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement);
+			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement, officalLeaderboardIDs);
 			var funStats = await PlayerDAL.GetFunStats(steamID);
 
 			var stats = new PlayerGlobalStats
@@ -64,8 +67,8 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetRecentActivity(ulong steamID)
 		{
-			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows:40, steamID:steamID);
-			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows:40, steamID:steamID);
+			var recentFirstSightings = await EntryDAL.GetRecentFirstSightings(numRows: 40, steamID: steamID);
+			var recentImprovements = await HistoryDAL.GetRecentImprovements(numRows: 40, steamID: steamID);
 
 			var recentActivity = new List<Activity>();
 			recentFirstSightings.ForEach(x => recentActivity.Add(new Activity()
@@ -150,8 +153,15 @@ namespace DistanceTracker.Controllers
 						LevelName = percentileRank.LevelName,
 						LeaderboardName = percentileRank.LeaderboardName,
 						LevelSet = percentileRank.LevelSet,
+						ImageURL = percentileRank.ImageURL,
 					},
 				};
+
+				// Skip levels that are over the limit
+				if(groupedHistogramDataPoints.FirstOrDefault(x => x.Key == percentileRank.LeaderboardID) == null)
+				{
+					continue;
+				}
 
 				// Create the data point dictionary for the histogram
 				var histogramDataPoints = groupedHistogramDataPoints
@@ -167,6 +177,9 @@ namespace DistanceTracker.Controllers
 				histograms.Add(histogram);
 			}
 
+			// TODO: This limit is here until I rewrite the global comparisons to be searchable
+			histograms = histograms.Take(100).ToList();
+
 			return new JsonResult(histograms.GroupBy(x => x.Leaderboard.LevelSet).ToDictionary(x => x.Key, x => x.ToList()));
 		}
 
@@ -174,13 +187,15 @@ namespace DistanceTracker.Controllers
 		{
 			var players = await SteamDAL.GetPlayerSummaries(steamID);
 			var player = players.FirstOrDefault();
-			if(player != null)
+			var background = await SteamDAL.GetProfileBackground(steamID);
+			if (player != null)
 			{
 				await PlayerDAL.UpdateSteamAvatar(steamID, player.Avatar);
 				await PlayerDAL.UpdateSteamName(steamID, player.PersonaName);
+				await PlayerDAL.UpdateSteamBackground(steamID, background);
 			}
 
-			return RedirectToAction("Index", new {steamID = steamID});
+			return RedirectToAction("Index", new { steamID = steamID });
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

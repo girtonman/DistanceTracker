@@ -1,6 +1,7 @@
 ﻿@{
 	ViewData["Title"] = "All Levels";
 }
+@model string
 
 <style>
 .level-card .card {
@@ -9,25 +10,44 @@
 </style>
 
 <script>
+	var debounce = null;
 	jQuery(function () {
-		getLevels();
+		search();
+		
+		$('#searchQuery').on('input', function () {
+			clearTimeout(debounce);
+			debounce = setTimeout(search, 1000);
+		});
 	});
 
-	function getLevels() {
+	function search() {
+		var q = $('#searchQuery').val();
+		var searchResults = $('#searchResults');
+		searchResults.html('');
+		$('#levelsPlaceholder').show();
+		$('#noResults').hide();
+		$('#searchResultsMessage').hide();
+
 		$.ajax({
-			url: '/Leaderboard/GetLevels',
+			url: '/Leaderboard/SearchLevels',
 			method: 'GET',
+			data: {
+				q: q
+			},
 			success: async function (data) {
 				$('#levelsPlaceholder').hide();
-				var levels = $('#levels');
+				if (data.length > 0 && q.length > 0)
+				{
+					$('#searchResultsMessage').show();
+				}
 				for (var i = 0; i < data.length; i++) {
 					var levelSet = data[i];
 					for (var j = 0; j < data[i].length; j++) {
 						var level = levelSet[j];
 						if (j == 0) {
-							levels.append(`
+							searchResults.append(`
 								<div class="col-12 fade-in text-left">
-									<h1 style="margin-top: 30px;">${level.levelSet}</h1>
+									<h1 style="margin-top: 30px;">${level.levelSet ?? "Workshop"}</h1>
 									<hr />
 								</div>
 							`);
@@ -46,15 +66,19 @@
 								</a>
 							</div>
 						`);
-						levels.append(row);
+						searchResults.append(row);
 						if ((j + 1) % 4 == 0 && j > 0) {
 							await new Promise(r => setTimeout(r, 100));
 						}
 					}
 				}
+				
+				if (data.length == 0) {
+					$('#noResults').show();
+				}
 			},
 			error: function () {
-				toastr.error('Failed to load global stats for this player');
+				toastr.error('Failed to load level search results');
 			}
 		});
 	};
@@ -62,9 +86,18 @@
 
 <div class="container text-center fade-in">
 	<div class="row">
-		<div class="col">
-			<div id="levelsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-			<div class="row" id="levels"></div>
+		<div class="col-12">
+			<form class="form mt-4 fade-in">
+				<div class="form-group" style="width:100%">
+					<input type="text" class="form-control" id="searchQuery" name="q" placeholder="Enter a level name" value="@Model">
+				</div>
+			</form>
+			<h4 class="text-left fade-in" id="searchResultsMessage">Search Results (Showing First 100 Results)</h4>
 		</div>
+		<div class="col-12">
+			<div id="levelsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+			<div class="row" id="searchResults"></div>
+		</div>
+		<div id="noResults" class="col-12 text-center mt-4"><h2>No results 😐</h2></div>
 	</div>
 </div>

@@ -10,6 +10,7 @@ namespace DistanceTracker.Models
 		public ulong SteamID { get; set; }
 		public string Name { get; set; }
 		public string SteamAvatar { get; set; }
+		public string SteamBackground { get; set; }
 
 		public async Task<string> GetSteamAvatar(SteamDAL steamDAL, PlayerDAL playerDAL, string suffix = null)
 		{
@@ -22,7 +23,7 @@ namespace DistanceTracker.Models
 			{
 				var players = await steamDAL.GetPlayerSummaries(SteamID);
 				var player = players.FirstOrDefault();
-				if(player == null)
+				if (player == null)
 				{
 					SteamAvatar = "Unknown";
 				}
@@ -33,7 +34,7 @@ namespace DistanceTracker.Models
 				}
 			}
 
-			if(string.IsNullOrEmpty(suffix))
+			if (string.IsNullOrEmpty(suffix) || SteamAvatar.EndsWith(".gif"))
 			{
 				return SteamAvatar;
 			}
