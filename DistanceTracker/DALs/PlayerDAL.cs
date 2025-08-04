@@ -81,7 +81,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"UPDATE Players SET Name = '@steamName' WHERE SteamID = {steamID}";
+			var sql = $"UPDATE Players SET Name = @steamName WHERE SteamID = {steamID}";
 
 			var command = new MySqlCommand(sql, Connection);
 			command.Parameters.AddWithValue("@steamName", steamName);
