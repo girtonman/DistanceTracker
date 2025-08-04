@@ -53,7 +53,7 @@ namespace DistanceTracker.DALs
 		public async Task<List<Leaderboard>> GetLeaderboards(bool? isOfficial = null, LevelType? levelType = null)
 		{
 			Connection.Open();
-			var select = "SELECT ID, LevelName, LeaderboardName, IsOfficial FROM Leaderboards ";
+			var select = "SELECT ID, LevelName, LeaderboardName, IsOfficial, LevelType FROM Leaderboards ";
 
 			var clauses = new List<string>();
 			if(isOfficial.HasValue)
@@ -79,6 +79,7 @@ namespace DistanceTracker.DALs
 					LevelName = reader.GetString(1),
 					LeaderboardName = reader.GetString(2),
 					IsOfficial = reader.GetBoolean(3),
+					LevelType = (LevelType) reader.GetUInt32(4),
 				});
 			}
 

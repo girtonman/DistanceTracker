@@ -313,34 +313,26 @@ namespace DistanceTracker.DALs
 			return optimalTotal;
 		}
 
-		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID, List<uint> leaderboardIDs)
+		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPlayer(ulong steamID, List<Leaderboard> leaderboards)
 		{
 			// Hide our optimization sins in a nice little package
 			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
 			// so that we can force the RANK() to be limited to the least amount of rows possible
 			// This cursed optimization brought to you by noodle_beard and JnvSor
-			var materializedUnion = string.Join(" UNION ALL ", leaderboardIDs
-				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID FROM LeaderboardEntries WHERE LeaderboardID = {x} ORDER BY Milliseconds ASC LIMIT 1000)"));
+			var materializedUnion = string.Join(" UNION ALL ", leaderboards
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, ROW_NUMBER() AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")} LIMIT 1000)"));
 
 			var sql = $@"
 				WITH limited_entries AS
 				(
 					{materializedUnion}
 				),
-				ranks AS
-				(
-					SELECT 
-						Milliseconds,
-						LeaderboardID,
-						SteamID,
-						RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM limited_entries
-				),
 				le AS
 				(
 					SELECT
 						*,
 						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
-					FROM ranks
+					FROM limited_entries
 				),
 				global_leaderboard AS
 				(
@@ -378,34 +370,26 @@ namespace DistanceTracker.DALs
 			return globalRanking;
 		}
 
-		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPoints(int points, List<uint> leaderboardIDs)
+		public async Task<RankedLeaderboardEntry> GetGlobalRankingForPoints(int points, List<Leaderboard> leaderboards)
 		{		
 			// Hide our optimization sins in a nice little package
 			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
 			// so that we can force the RANK() to be limited to the least amount of rows possible
 			// This cursed optimization brought to you by noodle_beard and JnvSor
-			var materializedUnion = string.Join(" UNION ALL ", leaderboardIDs
-				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID FROM LeaderboardEntries WHERE LeaderboardID = {x} ORDER BY Milliseconds ASC LIMIT 1000)"));
+			var materializedUnion = string.Join(" UNION ALL ", leaderboards
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, ROW_NUMBER() AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")} LIMIT 1000)"));
 
 			var sql = $@"
 				WITH limited_entries AS
 				(
 					{materializedUnion}
 				),
-				ranks AS
-				(
-					SELECT 
-						Milliseconds,
-						LeaderboardID,
-						SteamID,
-						RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM limited_entries
-				),
 				le AS
 				(
 					SELECT
 						*,
 						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
-					FROM ranks
+					FROM limited_entries
 				),
 				global_leaderboard AS
 				(

@@ -33,14 +33,13 @@ namespace DistanceTracker.Controllers
 
 		public async Task<IActionResult> GetGlobalStats(ulong steamID)
 		{
-			var officialLeaderboards = await LeaderDAL.GetLeaderboards(true);
-			var officalLeaderboardIDs = officialLeaderboards.Select(x => x.ID).ToList();
+			var officialLeaderboards = await LeaderDAL.GetLeaderboards(isOfficial: true);
 
-			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID, officalLeaderboardIDs);
+			var globalRanking = await EntryDAL.GetGlobalRankingForPlayer(steamID, officialLeaderboards);
 
-			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID, officalLeaderboardIDs);
+			var lastWeeksImprovements = await HistoryDAL.GetPastWeeksImprovements(steamID, officialLeaderboards.Select(x => x.ID).ToList());
 			var pointsImprovement = NoodlePointsUtil.CalculateImprovement(lastWeeksImprovements);
-			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement, officalLeaderboardIDs);
+			var oldGlobalRank = await EntryDAL.GetGlobalRankingForPoints((int)globalRanking.NoodlePoints - pointsImprovement, officialLeaderboards);
 			var funStats = await PlayerDAL.GetFunStats(steamID);
 
 			var stats = new PlayerGlobalStats
