@@ -7,7 +7,7 @@
 
 @{
 	ViewData["Title"] = Model.Leaderboard.LevelName;
-	var BestEntry = Model.LeaderboardEntries.First();
+	var BestEntry = Model.LeaderboardEntries.FirstOrDefault();
 	var SecondBestEntry = Model.LeaderboardEntries.FirstOrDefault(x => x.Rank != 1);
 	var HeaderHeightPX = 450;
 	var TabHeightPX = 20;
@@ -64,38 +64,50 @@ $('#pills-tab a').on('click', function (e) {
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>Leader</h5>
+				@if(BestEntry != null)
+				{
 				<h2><img src="@await BestEntry.Player.GetSteamAvatar(steamDAL, playerDAL, "_medium")" /> @BestEntry.Player.Name</h2>
+				}
 			</div>
 		</div>
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>Record Age</h5>
+				@if(BestEntry != null)
+				{
 				<h2>@Formatter.TimeAgoFromUnixTime(BestEntry.UpdatedTimeUTC)</h2>
+				}
 			</div>
 		</div>
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>World Record</h5>
-				@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+				@if(BestEntry != null)
 				{
-					<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds)</h2>
-				}
-				else
-				{
-					<h2>@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+					@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+					{
+						<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds)</h2>
+					}
+					else
+					{
+						<h2>@Formatter.TimeFromMs(BestEntry.Milliseconds)</h2>
+					}
 				}
 			</div>
 		</div>
 		<div class="col-3">
 			<div class="info-card rounded-corners-large fit-content box-shadow">
 				<h5>World Record Gap</h5>
-				@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+				@if (BestEntry != null && SecondBestEntry != null)
 				{
-					<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds-SecondBestEntry.Milliseconds)</h2>
-				}
-				else
-				{
-					<h2>@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+					@if(Model.Leaderboard.LevelType == LevelType.Stunt)
+					{
+						<h2>@Formatter.ElectronVolts(BestEntry.Milliseconds-SecondBestEntry.Milliseconds)</h2>
+					}
+					else
+					{
+						<h2>@Formatter.TimeFromMs(SecondBestEntry.Milliseconds-BestEntry.Milliseconds)</h2>
+					}
 				}
 			</div>
 		</div>
