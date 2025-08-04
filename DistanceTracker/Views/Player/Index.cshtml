@@ -25,6 +25,20 @@
 		background-color: #212529;
 	}
 
+	.nav-dark > li:not(:has(a.active)) .nav-link {
+		background-color: #212529;
+		opacity: 75%;
+	}
+
+	.nav-dark > li:not(:has(a.active)) .nav-link:hover {
+		background-color: #212529;
+		opacity: 100%;
+	}
+
+	.nav-pills > li {
+		margin-right: 5px;
+	}
+
 	#backgroundVideo {
 		position: fixed;
 		@* left: 50%;
@@ -35,6 +49,8 @@
 		min-width: 100%;
 		min-height: 100%;
 		z-index: -1;
+		left: 50%;
+  		transform: translateX(-50%);
 	}
 </style>
 
@@ -401,22 +417,22 @@
 			<div class="fade-in info-card box-shadow rounded-corners">
 				<div class="row">
 					<div class="col-lg-12 col-xl-6">
-						<h5>Global Rank</h5>
+						<h6>Global Rank</h6>
 						<div id="globalRankPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 						<h4 id="globalRank" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h4>
-						<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRankImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
+						<h6 style="white-space: nowrap">Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRankImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 					</div>
 					<div class="col-lg-12 col-xl-6">
-						<h5>Rating</h5>
+						<h6>Rating</h6>
 						<div id="globalRatingPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 						<h4 id="globalRating" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h4>
-						<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRatingImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
+						<h6 style="white-space: nowrap">Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalRatingImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 					</div>
 					<div class="col-lg-12 col-xl-12">
-						<h5>Points</h5>
+						<h6>Points</h6>
 						<div id="globalPointsPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 						<h4 id="globalPoints" class="odometer" style="display: none; margin-bottom: 1px; margin-top: -6px;"></h4>
-						<h6>Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalPointsImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
+						<h6 style="white-space: nowrap">Last 7d: <i class="fas fa-arrow-up fa-sm text-success"></i> <span id="globalPointsImprovement" class="odometer" style="margin-top: -2px;">0</span></h6>
 					</div>
 				</div>
 			</div>
@@ -432,19 +448,19 @@
 							<span id="tracksCompletedPlaceholder">-</span>
 						</h6>
 					</div>
-					<div class="col-8">
+					<div class="col-9">
 						<h6>Total Improvements:</h6>
 					</div>
-					<div class="col-4">
+					<div class="col-3">
 						<h6 class="text-right">
 							<span id="totalImprovements"></span>
 							<span id="totalImprovementsPlaceholder">-</span>
 						</h6>
 					</div>
-					<div class="col-6">
+					<div class="col-5">
 						<h6>First Seen:</h6>
 					</div>
-					<div class="col-6">
+					<div class="col-7">
 						<h6 class="text-right">
 							<span id="firstSeen"></span>
 							<span id="firstSeenPlaceholder">-</span>
