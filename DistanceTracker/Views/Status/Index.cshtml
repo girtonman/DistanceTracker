@@ -1,0 +1,106 @@
+﻿@{
+	ViewData["Title"] = "Status";
+}
+
+<script>
+	var lastUpdateTimeUTC = null;
+
+	jQuery(function () {
+		getScraperStatus();
+	});
+
+	function getScraperStatus() {
+		$.ajax({
+			url: '/Status/GetScraperStatus',
+			method: 'GET',
+			success: async function (data) {
+				// setup
+				$('#scrapersPlaceholder').hide();
+				var scrapers = $('#scrapers');
+				scrapers.html('');
+
+				// handle the scraper statuses
+				for (var i = 0; i < data.scrapers.length; i++) {
+					var scraper = data.scrapers[i];
+					// "Scraper" is a special meta scraper used for overall status
+					if (scraper.name == "Scraper") {
+						continue;
+					}
+
+					var row = $(`
+						<tr>
+							<td class="text-left no-wrap"><div class="fade-in">
+								${scraper.statusString}
+							</div></td>
+							<td class="text-left no-wrap"><div class="fade-in">
+								${scraper.name}
+							</div></td>
+							@* TODO <td class="text-left entry-img no-wrap"><div class="fade-in">
+								<img src="${scraper.statusImage}" />
+								${scraper.name}
+							</div></td> *@
+							<td class="text-left no-wrap"><div class="fade-in">
+								${scraper.statusMessage}
+							</div></td>
+							<td class="no-wrap"><div class="fade-in livestamp" data-livestamp="${scraper.lastStartUTC / 1000}"></div></td>
+							<td class="no-wrap"><div class="fade-in livestamp" data-livestamp="${scraper.lastFinishUTC / 1000}"></div></td>
+							<td class="no-wrap"><div class="fade-in livestamp" data-livestamp="${scraper.lastHeartbeatUTC / 1000}"></div></td>
+							<td class="no-wrap"><div class="fade-in">
+								${scraper.apiSuccessCount} (<abbr title="Count from Last Run">${scraper.lastAPISuccessCount}</abbr>)
+							</div></td>
+							<td class="no-wrap"><div class="fade-in">
+								${scraper.apiFailureCount} (<abbr title="Count from Last Run">${scraper.lastAPIFailureCount}</abbr>)
+							</div></td>
+						</tr>
+					`);
+
+					scrapers.append(row);
+					await new Promise(r => setTimeout(r, 100));
+				}
+
+				// handle the last complete scan time
+				var lastComplete = $('#lastCompleteScan');
+				lastComplete.html(`<span class="livestamp" data-livestamp="${data.lastCompleteScanUTC / 1000}"></span>`);
+					
+				$('.livestamp').on('change.livestamp', function(event, from, to) {
+					event.preventDefault(); // Stop the text from changing automatically
+					$(this).fadeOut(function() {
+						$(this).html(to).fadeIn();
+					});
+				});
+			},
+			error: function () {
+				toastr.error('Failed to load scraper status');
+			},
+			@* complete: function () {
+				setTimeout(getScraperStatus, 10000);
+			} *@
+		});
+	};
+</script>
+
+<div class="container text-center" style="max-width: 90%">
+	<div class="row">
+		<div class="col">
+			<h4 class="text-left">Status (Most stale leaderboard: <span id="lastCompleteScan"></span>)</h4>
+			<table class="table table-striped table-dark" style="table-layout: fixed">
+				<thead>
+					<tr>
+						<th class="text-left">Status</th>
+						<th class="text-left">Name</th>
+						<th class="text-left">Status Message</th>
+						<th style="width: 200px">Started</th>
+						<th style="width: 200px">Finished</th>
+						<th style="width: 200px">Heartbeat</th>
+						<th style="width: 200px">API Successes</th>
+						<th style="width: 200px">API Failures</th>
+					</tr>
+				</thead>
+				<tbody id="scrapers">
+				</tbody>
+			</table>
+			<div id="scrapersPlaceholder" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+		</div>
+	</div>
+
+</div>

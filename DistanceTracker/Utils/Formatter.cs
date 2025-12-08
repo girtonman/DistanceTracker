@@ -34,6 +34,11 @@ namespace DistanceTracker
 			return $"{milliseconds:n0} eV";
 		}
 
+		public static string TimeAgoFromUnixTime(ulong? timestamp)
+		{
+			return timestamp.HasValue ? TimeAgoFromUnixTime(timestamp.Value) : "never";
+		}
+
 		public static string TimeAgoFromUnixTime(ulong timestamp)
 		{
 			var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
