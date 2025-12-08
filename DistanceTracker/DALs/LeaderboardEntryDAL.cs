@@ -762,7 +762,7 @@ namespace DistanceTracker.DALs
 			return percentileRanks;
 		}
 
-		public async Task<List<LeaderboardEntry>> GetOldestWRs(int numRows = 120)
+		public async Task<List<LeaderboardEntry>> GetOldestWRs(int numRows = 200)
 		{
 			Connection.Open();
 			var sql = @$"
@@ -771,7 +771,8 @@ namespace DistanceTracker.DALs
 				LEFT JOIN LeaderboardEntries le ON WR.LeaderboardID = le.LeaderboardID AND WR.Milliseconds = le.Milliseconds
 				LEFT JOIN Leaderboards l on l.ID = le.LeaderboardID
 				LEFT JOIN Players p on p.SteamID = le.SteamID
-				ORDER BY le.UpdatedTimeUTC ASC";
+				ORDER BY le.UpdatedTimeUTC ASC
+				LIMIT {numRows}";
 
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
