@@ -51,7 +51,7 @@ namespace DistanceTracker.DALs
 			return leaderboard;
 		}
 
-		public async Task<List<Leaderboard>> GetLeaderboards(bool? isOfficial = null, LevelType? levelType = null)
+		public async Task<List<Leaderboard>> GetLeaderboards(bool? isOfficial = null, LevelType? levelType = null, List<uint> leaderboardIDs = null)
 		{
 			Connection.Open();
 			var select = "SELECT ID, LevelName, LeaderboardName, IsOfficial, LevelType FROM Leaderboards ";
@@ -64,6 +64,10 @@ namespace DistanceTracker.DALs
 			if(levelType.HasValue)
 			{
 				clauses.Add($"LevelType = {levelType.Value:D}");
+			}
+			if(leaderboardIDs != null && leaderboardIDs.Count > 0)
+			{
+				clauses.Add($"ID IN ({string.Join(",", leaderboardIDs)})");
 			}
 			var where = (clauses.Count != 0 ? "WHERE " : "") + string.Join(" AND ", clauses);
 
