@@ -121,17 +121,40 @@ namespace DistanceTracker.DALs
 				return new List<OverviewRankedLeaderboardEntry>();
 			}
 
-			// Hide our optimization sins in a nice little package
-			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
-			// so that we can force the RANK() to be limited to the least amount of rows possible
-			// This cursed optimization brought to you by noodle_beard and JnvSor
-			var materializedUnion = string.Join(" UNION ALL ", leaderboards
-				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")}) AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} LIMIT 1000)"));
-			
+			var timeLeaderboards = leaderboards.Where(x => x.LevelType == LevelType.Sprint || x.LevelType == LevelType.Challenge).ToList();
+			var stuntLeaderboards = leaderboards.Where(x => x.LevelType == LevelType.Stunt).ToList();
+
+			var unionSQL = new List<string>();
+
+			if (timeLeaderboards.Count > 0) { 
+				unionSQL.Add(@$"
+					SELECT
+						le.Milliseconds, le.LeaderboardID, le.SteamID,
+						RANK() OVER(PARTITION BY le.LeaderboardID ORDER BY le.Milliseconds ASC) AS `Rank`,
+						l.LevelType
+					FROM LeaderboardEntries le
+					LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
+					WHERE le.IsTop1000 = 1 AND l.ID IN ({string.Join(',', timeLeaderboards.Select(x => x.ID))})
+				");
+			}
+
+			if (stuntLeaderboards.Count > 0)
+			{
+				unionSQL.Add(@$"
+					SELECT
+						le.Milliseconds, le.LeaderboardID, le.SteamID,
+						RANK() OVER(PARTITION BY le.LeaderboardID ORDER BY le.Milliseconds DESC) AS `Rank`,
+						l.LevelType
+					FROM LeaderboardEntries le
+					LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
+					WHERE le.IsTop1000 = 1 AND l.ID IN ({string.Join(',', stuntLeaderboards.Select(x => x.ID))})
+				");
+			}
+
 			var sql = @$"
 				WITH limited_entries AS
 				(
-					{materializedUnion}
+					{string.Join(" UNION ALL ", unionSQL)}
 				),
 				le AS
 				(
@@ -139,11 +162,10 @@ namespace DistanceTracker.DALs
 						limited_entries.LeaderboardID,
 						limited_entries.SteamID,
 						limited_entries.Rank,
-						IF(l.LevelType <> 2, Milliseconds, 0) AS Milliseconds,
-						IF(l.LevelType = 2, Milliseconds, 0) AS StuntScore,
-						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
+						IF(limited_entries.LevelType <> 2, limited_entries.Milliseconds, 0) AS Milliseconds,
+						IF(limited_entries.LevelType = 2, limited_entries.Milliseconds, 0) AS StuntScore,
+						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
 					FROM limited_entries
-					LEFT JOIN Leaderboards l ON l.ID = limited_entries.LeaderboardID
 				),
 				global_leaderboard AS
 				(
