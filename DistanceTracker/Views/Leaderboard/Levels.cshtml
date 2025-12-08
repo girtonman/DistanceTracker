@@ -60,7 +60,8 @@
 										<div class="card-body">
 											<h5 class="card-title">${level.levelName}</h5>
 											${level.entryCount == null ? '' : `<h6 class="card-subtitle mb-2">${level.entryCount} Entries</h6>`}
-											${level.latestUpdateUTC == null ? '' : `<h6 class="card-subtitle mb-2">Last Activity ${level.timeAgoString}</h6>`}
+											${level.latestUpdateUTC == null ? '' : `<h6 class="card-subtitle mb-2">Last Activity ${level.updateTimeAgoString}</h6>`}
+											${level.latestUpdateUTC == null ? '' : `<h6 class="card-subtitle mb-2">Last Scan ${level.scanTimeAgoString}</h6>`}
 										</div>
 									</div>
 								</a>

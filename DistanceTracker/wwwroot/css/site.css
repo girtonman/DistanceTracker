@@ -377,3 +377,7 @@ hr {
 .rounded-corners-large {
 	border-radius: 0.5rem;
 }
+
+.sub-h4 {
+	font-size: 1rem;
+}

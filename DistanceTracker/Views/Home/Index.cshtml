@@ -23,7 +23,7 @@
 			<div>Last updated <span class="font-weight-bold">@Model.TimeAgoString</span></div>
 			@if((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Model.UpdatedTimeUTC > 3600000)
 			{
-				<div class="text-warning">The scraper might be dead. Ping <span class="font-weight-bold">@@noodle_beard</span> in <a class="font-weight-bold" href="https://discord.gg/distance">#tools</a> to fix it</div>
+				<div class="text-warning">The scraper is dead. Ping <span class="font-weight-bold">@@noodle_beard</span> in <a class="font-weight-bold" href="https://discord.gg/distance">#tools</a> to fix it</div>
 			}
 		</div>
 	</div>
