@@ -363,7 +363,7 @@ namespace DistanceTracker.DALs
 
 				SELECT 
 					*,
-					ROUND(TotalNoodlePoints / 1200.0, 2) as PlayerRating
+					ROUND(TotalNoodlePoints / (10.0 * {leaderboards.Count}), 2) as PlayerRating
 				FROM global_leaderboard
 				WHERE SteamID = {steamID}";
 
@@ -420,7 +420,7 @@ namespace DistanceTracker.DALs
 
 				SELECT
 					*,
-					ROUND(TotalNoodlePoints / 1200.0, 2) as PlayerRating
+					ROUND(TotalNoodlePoints / (10.0 * {leaderboards.Count}), 2) as PlayerRating
 				FROM global_leaderboard
 				WHERE TotalNoodlePoints <= {points}
 				ORDER BY TotalNoodlePoints DESC
