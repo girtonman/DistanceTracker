@@ -23,8 +23,7 @@ namespace DistanceTracker.DALs
 				(SELECT COUNT(*) FROM LeaderboardEntries) LeaderboardEntryCount,
 				(SELECT COUNT(*) FROM LeaderboardEntryHistory) ImprovementCount,
 				(SELECT COUNT(*) FROM Leaderboards) LeaderboardCount,
-				(SELECT MAX(UpdatedTimeUTC) FROM LeaderboardEntries) UpdatedEntryTimeUTC,
-				(SELECT MAX(UpdatedTimeUTC) FROM LeaderboardEntryHistory) UpdatedImprovementTimeUTC
+				(SELECT MAX(LastScannedTimeUTC) FROM Leaderboards) LastScannedTimeUTC
 			FROM (SELECT 1) dummy
 			";
 
@@ -39,12 +38,7 @@ namespace DistanceTracker.DALs
 				siteStats.LeaderboardEntryCount = reader.GetInt32(1);
 				siteStats.ImprovementCount = reader.GetInt32(2);
 				siteStats.LeaderboardCount = reader.GetInt32(3);
-
-
-				var updatedEntryTime = reader.GetUInt64(4);
-				var updatedImprovementTime = reader.GetUInt64(5);
-				var updatedTime = updatedEntryTime > updatedImprovementTime ? updatedEntryTime : updatedImprovementTime;
-				siteStats.UpdatedTimeUTC = updatedTime;
+				siteStats.UpdatedTimeUTC = reader.IsDBNull(4) ? 0 : reader.GetUInt64(4);
 			}
 			reader.Close();
 			Connection.Close();

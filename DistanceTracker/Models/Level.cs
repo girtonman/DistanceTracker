@@ -13,12 +13,21 @@ namespace DistanceTracker.Models
 		public ulong? NewestTimeUTC { get; set; }
 		public ulong? NewestImprovementUTC { get; set; }
 		public ulong? LatestUpdateUTC { get; set; }
-		public string TimeAgoString
+		public ulong? LastScannedTimeUTC { get; set; }
+		public string UpdateTimeAgoString
 		{
 			get
 			{
 				return LatestUpdateUTC.HasValue ? Formatter.TimeAgoFromUnixTime(LatestUpdateUTC.Value) : "";
 			}
 		}
+		public string ScanTimeAgoString
+		{
+			get
+			{
+				return LastScannedTimeUTC.HasValue ? Formatter.TimeAgoFromUnixTime(LastScannedTimeUTC.Value) : "";
+			}
+		}
+		
 	}
 }

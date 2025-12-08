@@ -19,7 +19,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"SELECT ID, LevelName, ImageURL, LeaderboardName, IsOfficial, WorkshopFileID, Tags, LevelType, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime FROM Leaderboards WHERE ID = {leaderboardID}";
+			var sql = $"SELECT ID, LevelName, ImageURL, LeaderboardName, IsOfficial, WorkshopFileID, Tags, LevelType, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime, LastScannedTimeUTC FROM Leaderboards WHERE ID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -41,6 +41,7 @@ namespace DistanceTracker.DALs
 					WorkshopFileID = reader.IsDBNull(5) ? (uint?)null : reader.GetUInt32(5),
 					Tags = reader.IsDBNull(6) ? "" : reader.GetString(6),
 					LevelType = (LevelType)reader.GetUInt32(7),
+					LastScannedTimeUTC = reader.IsDBNull(12) ? (ulong?)null : reader.GetUInt64(12),
 
 					MedalTimes = new MapMedalTimes(diamondTime, goldTime, silverTime, bronzeTime),
 				};
@@ -123,6 +124,7 @@ namespace DistanceTracker.DALs
 			lb.IsOfficial,
 			lb.SteamLeaderboardID,
 			lb.LevelSet,
+			lb.LastScannedTimeUTC,
 			LeaderboardCounts.EntryCount,
 			RecentFirstSightings.NewestTimeUTC,
 			RecentImprovements.NewestImprovementUTC
@@ -170,9 +172,10 @@ namespace DistanceTracker.DALs
 					IsOfficial = reader.GetBoolean(4),
 					SteamLeaderboardID = reader.IsDBNull(5) ? (ulong?)null : reader.GetUInt64(5),
 					LevelSet = reader.IsDBNull(6) ? null : reader.GetString(6),
-					EntryCount = reader.IsDBNull(7) ? (uint?)null : reader.GetUInt32(7),
-					NewestTimeUTC = reader.IsDBNull(8) ? (ulong?)null : reader.GetUInt64(8),
-					NewestImprovementUTC = reader.IsDBNull(9) ? (ulong?)null : reader.GetUInt64(9),
+					LastScannedTimeUTC = reader.IsDBNull(7) ? (ulong?)null : reader.GetUInt64(7),
+					EntryCount = reader.IsDBNull(8) ? (uint?)null : reader.GetUInt32(8),
+					NewestTimeUTC = reader.IsDBNull(9) ? (ulong?)null : reader.GetUInt64(9),
+					NewestImprovementUTC = reader.IsDBNull(10) ? (ulong?)null : reader.GetUInt64(10),
 				};
 				level.LatestUpdateUTC = level.NewestImprovementUTC.HasValue ?
 					(level.NewestTimeUTC.HasValue
@@ -198,6 +201,27 @@ namespace DistanceTracker.DALs
 			await command.ExecuteNonQueryAsync();
 
 			Connection.Close();
+		}
+
+		public async Task<ulong> GetOldestScanTime()
+		{
+			Connection.Open();
+			
+			var sql = $"SELECT MIN(LastScannedTimeUTC) FROM Leaderboards";
+
+			var command = new MySqlCommand(sql, Connection);
+			var reader = await command.ExecuteReaderAsync();
+
+			ulong scanTime = 0;
+			while (reader.Read())
+			{
+				scanTime = reader.IsDBNull(0) ? 0 : reader.GetUInt64(0);
+			}
+
+			reader.Close();
+			Connection.Close();
+
+			return scanTime;
 		}
 	}
 }
