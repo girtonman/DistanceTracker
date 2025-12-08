@@ -348,7 +348,7 @@ namespace DistanceTracker.DALs
 				(
 					SELECT
 						*,
-						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
+						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 					FROM limited_entries
 				),
 				global_leaderboard AS
@@ -405,7 +405,7 @@ namespace DistanceTracker.DALs
 				(
 					SELECT
 						*,
-						ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) AS NoodlePoints
+						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
 					FROM limited_entries
 				),
 				global_leaderboard AS
