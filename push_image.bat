@@ -5,10 +5,10 @@
 @REM doctl auth init distance
 @REM doctl registry login
 
-docker build distance_tracker:2.1
-docker tag distance_tracker:2.1 registry.digitalocean.com/noodle/distance_tracker:2.1
-docker push registry.digitalocean.com/noodle/distance_tracker:2.1
+docker build distance_tracker:2.2
+docker tag distance_tracker:2.2 registry.digitalocean.com/noodle/distance_tracker:2.2
+docker push registry.digitalocean.com/noodle/distance_tracker:2.2
 
 @REM In droplet:
-@REM docker pull registry.digitalocean.com/noodle/distance_tracker:2.1
-@REM docker run -d -p 80:80 --name tracker_2_1 registry.digitalocean.com/noodle/distance_tracker:2.1
+@REM docker pull registry.digitalocean.com/noodle/distance_tracker:2.2
+@REM docker run -d -p 80:80 --name tracker_2_2 registry.digitalocean.com/noodle/distance_tracker:2.2
