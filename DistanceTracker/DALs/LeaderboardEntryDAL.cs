@@ -337,7 +337,7 @@ namespace DistanceTracker.DALs
 			// so that we can force the RANK() to be limited to the least amount of rows possible
 			// This cursed optimization brought to you by noodle_beard and JnvSor
 			var materializedUnion = string.Join(" UNION ALL ", leaderboards
-				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, ROW_NUMBER() AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")} LIMIT 1000)"));
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")}) AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} LIMIT 1000)"));
 
 			var sql = $@"
 				WITH limited_entries AS
@@ -394,7 +394,7 @@ namespace DistanceTracker.DALs
 			// so that we can force the RANK() to be limited to the least amount of rows possible
 			// This cursed optimization brought to you by noodle_beard and JnvSor
 			var materializedUnion = string.Join(" UNION ALL ", leaderboards
-				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, ROW_NUMBER() AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")} LIMIT 1000)"));
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")}) AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} LIMIT 1000)"));
 
 			var sql = $@"
 				WITH limited_entries AS
