@@ -104,9 +104,10 @@ namespace DistanceTracker.Controllers
 
 		private async Task<OverviewLeaderboardViewModel> GetOverviewForLeaderboardIDs(List<uint> leaderboardIDs)
 		{
+			var leaderboards = await LeaderDAL.GetLeaderboards(leaderboardIDs: leaderboardIDs);
 			var viewModel = new OverviewLeaderboardViewModel
 			{
-				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboardIDs),
+				LeaderboardEntries = await EntryDAL.GetGlobalLeaderboard(leaderboards),
 				WinnersCircle = await EntryDAL.GetGlobalWinnersCircle(leaderboardIDs),
 				OptimalTotalTime = await EntryDAL.GetOptimalTotal(leaderboardIDs),
 				OptimalTotalStuntScore = await EntryDAL.GetOptimalTotal(leaderboardIDs, true),

@@ -114,44 +114,61 @@ namespace DistanceTracker.DALs
 			return leaderboardEntries;
 		}
 
-		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(List<uint> leaderboardIDs, int numRows = 100)
+		public async Task<List<OverviewRankedLeaderboardEntry>> GetGlobalLeaderboard(List<Leaderboard> leaderboards, int numRows = 100)
 		{
-			if(leaderboardIDs.Count == 0)
+			if(leaderboards.Count == 0)
 			{
 				return new List<OverviewRankedLeaderboardEntry>();
 			}
 
-			Connection.Open();
+			// Hide our optimization sins in a nice little package
+			// This creates SQL that will emulate the functionality of a materialized view (since mysql doesn't have those)
+			// so that we can force the RANK() to be limited to the least amount of rows possible
+			// This cursed optimization brought to you by noodle_beard and JnvSor
+			var materializedUnion = string.Join(" UNION ALL ", leaderboards
+				.Select(x => $"(SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(ORDER BY Milliseconds {(x.LevelType == LevelType.Stunt ? "DESC" : "ASC")}) AS `Rank` FROM LeaderboardEntries WHERE LeaderboardID = {x.ID} LIMIT 1000)"));
+			
 			var sql = @$"
-				SELECT global_leaderboard.*,
-					ROUND(NoodlePoints / (10.0 * {leaderboardIDs.Count}), 2) as PlayerRating,
-					p.Name,
-					p.SteamAvatar
-				FROM(
+				WITH limited_entries AS
+				(
+					{materializedUnion}
+				),
+				le AS
+				(
+					SELECT
+						limited_entries.LeaderboardID,
+						limited_entries.SteamID,
+						limited_entries.Rank,
+						IF(l.LevelType <> 2, Milliseconds, 0) AS Milliseconds,
+						IF(l.LevelType = 2, Milliseconds, 0) AS StuntScore,
+						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
+					FROM limited_entries
+					LEFT JOIN Leaderboards l ON l.ID = limited_entries.LeaderboardID
+				),
+				global_leaderboard AS
+				(
 					SELECT
 						SteamID,
-						RANK() OVER(
-						  ORDER BY SUM(NoodlePoints) DESC
-						) as GlobalRank,
-						SUM(NoodlePoints) AS NoodlePoints,
-						SUM(IF(l.LevelType <> 2, Milliseconds, 0)) AS Milliseconds,
-						SUM(IF(l.LevelType = 2, Milliseconds, 0)) AS StuntScore,
+						SUM(NoodlePoints) as TotalNoodlePoints,
+						RANK() OVER(ORDER BY SUM(NoodlePoints) DESC) AS GlobalRank,
+						SUM(Milliseconds) AS Milliseconds,
+						SUM(StuntScore) AS StuntScore,
 						COUNT(*) AS NumTracksCompleted
-					FROM(
-						SELECT
-							*,
-							CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
-						FROM(
-								SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS `Rank` FROM LeaderboardEntries
-								WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)})
-						) ranks
-					) le
-					LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
+					FROM le
 					GROUP BY SteamID
-					ORDER BY SUM(NoodlePoints) DESC
-					LIMIT {numRows}
-				) global_leaderboard
-				LEFT JOIN Players p ON p.SteamID = global_leaderboard.SteamID";
+				)
+
+				SELECT 
+					global_leaderboard.*,
+					ROUND(TotalNoodlePoints / (10.0 * {leaderboards.Count}), 2) as PlayerRating,
+					p.Name,
+					p.SteamAvatar
+				FROM global_leaderboard
+				LEFT JOIN Players p ON p.SteamID = global_leaderboard.SteamID
+				LIMIT {numRows}
+			";
+
+			Connection.Open();
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -160,8 +177,8 @@ namespace DistanceTracker.DALs
 			{
 				var grle = new OverviewRankedLeaderboardEntry()
 				{
-					Rank = reader.GetInt32(1),
-					NoodlePoints = reader.GetDouble(2),
+					NoodlePoints = reader.GetDouble(1),
+					Rank = reader.GetInt32(2),
 					TotalMilliseconds = reader.GetUInt64(3),
 					TotalStuntScore = reader.GetUInt64(4),
 					NumTracksCompleted = reader.GetUInt32(5),
@@ -434,9 +451,9 @@ namespace DistanceTracker.DALs
 			Connection.Open();
 			var sql = @"
 				SELECT
-					le.`Rank`,
-					le.NoodlePoints,
-					ROUND(NoodlePoints / 10.0, 2) as PlayerRating,
+					CASE WHEN l.LevelType = 2 THEN le.StuntRank ELSE le.TimeRank END AS `Rank`,
+					CASE WHEN l.LevelType = 2 THEN le.StuntNoodlePoints ELSE le.TimeNoodlePoints END AS NoodlePoints,
+					CASE WHEN l.LevelType = 2 THEN ROUND(StuntNoodlePoints / 10.0, 2) ELSE ROUND(TimeNoodlePoints / 10.0, 2) END AS PlayerRating,
 					le.LeaderboardID,
 					le.SteamID,
 					l.LevelName,
@@ -446,9 +463,13 @@ namespace DistanceTracker.DALs
 				FROM(
 					SELECT
 						*,
-						CASE WHEN `Rank` is NULL OR `Rank` > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((`Rank` -1.0) / 1000.0) - 1.0), 2)))) END AS NoodlePoints
+						CASE WHEN TimeRank is NULL OR TimeRank > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((TimeRank -1.0) / 1000.0) - 1.0), 2)))) END AS TimeNoodlePoints,
+						CASE WHEN StuntRank is NULL OR StuntRank > 1000 THEN 0 ELSE ROUND(1000.0 * (1.0 - SQRT(1.0 - POW((((StuntRank -1.0) / 1000.0) - 1.0), 2)))) END AS StuntNoodlePoints
 					FROM(
-							SELECT Milliseconds, LeaderboardID, SteamID, RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) as `Rank` FROM LeaderboardEntries
+							SELECT Milliseconds, LeaderboardID, SteamID,
+								RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds ASC) AS TimeRank,
+								RANK() OVER(PARTITION BY LeaderboardID ORDER BY Milliseconds DESC) AS StuntRank
+							FROM LeaderboardEntries
 					) ranks
 				) le
 				LEFT JOIN Leaderboards l ON l.ID = le.LeaderboardID
@@ -560,12 +581,25 @@ namespace DistanceTracker.DALs
 						COUNT(SteamID) Count
 					FROM LeaderboardEntries le
 					JOIN (
-						SELECT 
-							LeaderboardID,
-							MIN(Milliseconds) MinTime
-						FROM LeaderboardEntries
-						WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)})
-						GROUP BY LeaderboardID
+						(
+							SELECT 
+								LeaderboardID,
+								MIN(Milliseconds) MinTime
+							FROM LeaderboardEntries mt
+							LEFT JOIN Leaderboards l ON l.ID = mt.LeaderboardID
+							WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)}) AND l.LevelType <> 2
+							GROUP BY LeaderboardID
+						)
+						UNION ALL
+						(
+							SELECT 
+								LeaderboardID,
+								MAX(Milliseconds) MaxScore
+							FROM LeaderboardEntries ms
+							LEFT JOIN Leaderboards l ON l.ID = ms.LeaderboardID
+							WHERE LeaderboardID IN ({string.Join(',', leaderboardIDs)}) AND l.LevelType = 2
+							GROUP BY LeaderboardID
+						)
 					) lmt ON lmt.LeaderboardID = le.LeaderboardID AND lmt.MinTime = le.Milliseconds
 					GROUP BY SteamID
 				) fpc ON fpc.SteamID = p.SteamID
