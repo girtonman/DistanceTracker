@@ -19,7 +19,7 @@ namespace DistanceTracker.DALs
 		{
 			Connection.Open();
 
-			var sql = $"SELECT ID, LevelName, ImageURL, LeaderboardName, IsOfficial, WorkshopFileID, Tags, LevelType, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime, LastScannedTimeUTC FROM Leaderboards WHERE ID = {leaderboardID}";
+			var sql = $"SELECT ID, LevelName, ImageURL, LeaderboardName, IsOfficial, WorkshopFileID, Tags, LevelType, BronzeMedalTime, SilverMedalTime, GoldMedalTime, DiamondMedalTime, LastScannedTimeUTC, IsIgnored FROM Leaderboards WHERE ID = {leaderboardID}";
 			var command = new MySqlCommand(sql, Connection);
 			var reader = await command.ExecuteReaderAsync();
 
@@ -42,6 +42,7 @@ namespace DistanceTracker.DALs
 					Tags = reader.IsDBNull(6) ? "" : reader.GetString(6),
 					LevelType = (LevelType)reader.GetUInt32(7),
 					LastScannedTimeUTC = reader.IsDBNull(12) ? (ulong?)null : reader.GetUInt64(12),
+					IsIgnored = reader.GetBoolean(13),
 
 					MedalTimes = new MapMedalTimes(diamondTime, goldTime, silverTime, bronzeTime),
 				};

@@ -9,16 +9,18 @@ namespace DistanceTracker.Controllers
 {
 	public class LeaderboardController : Controller
 	{
-		public LeaderboardController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, LeaderboardDAL lDAL)
+		public LeaderboardController(LeaderboardEntryDAL leDAL, LeaderboardEntryHistoryDAL lehDAL, LeaderboardDAL lDAL, RequestsDAL rDAL)
 		{
 			EntryDAL = leDAL;
 			HistoryDAL = lehDAL;
 			LeaderDAL = lDAL;
+			RequestsDAL = rDAL;
 		}
 
 		public LeaderboardEntryDAL EntryDAL { get; }
 		public LeaderboardEntryHistoryDAL HistoryDAL { get; }
 		public LeaderboardDAL LeaderDAL { get; }
+		public RequestsDAL RequestsDAL { get; }
 
 		public async Task<IActionResult> OfficialGlobal()
 		{
@@ -146,6 +148,25 @@ namespace DistanceTracker.Controllers
 			};
 
 			return View(viewModel);
+		}
+
+		public async Task<IActionResult> RequestUpdate(uint leaderboardID)
+		{
+			var leaderboard = await LeaderDAL.GetLeaderboard(leaderboardID);
+			if (leaderboard == null || leaderboard.IsIgnored)
+			{
+				return new JsonResult("Leaderboard doesn't exist or is currently ignored");
+			}
+			
+			var requestID = await RequestsDAL.AddRequest(leaderboardID);
+
+			return new JsonResult(requestID);
+		}
+
+		public async Task<IActionResult> GetUpdateRequestStatus(uint requestID)
+		{
+			var request = await RequestsDAL.GetRequest(requestID);
+			return new JsonResult(request);
 		}
 
 		public IActionResult Levels(string q) => View("Levels", q);
