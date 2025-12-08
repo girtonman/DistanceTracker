@@ -14,5 +14,6 @@
 		public bool IsReverseRankOrder { get => LevelType == LevelType.Stunt; }
 		public MapMedalTimes MedalTimes { get; set; }
 		public ulong? LastScannedTimeUTC { get; set; }
+		public bool IsIgnored { get; set; }
 	}
 }

@@ -46,10 +46,52 @@
 </style>
 
 <script>
+var requestID = null;
+var refreshingRequestStatus = false;
+
 $('#pills-tab a').on('click', function (e) {
 	e.preventDefault()
 	$(this).tab('show')
-})
+});
+
+jQuery(function () {
+	$('#requestUpdate').click(() => {
+		$.ajax({
+			url: '/Leaderboard/RequestUpdate',
+			method: 'POST',
+			data: {
+				leaderboardID: '@Model.Leaderboard.ID'
+			},
+			success: function (data) {
+				toastr.info('Update Requested. Page will refresh once the leaderboard has been scanned.', '', {timeOut: 0, extendedTimeOut: 0});
+				requestID = data;
+				if (!refreshingRequestStatus) {
+					refreshingRequestStatus = true;
+					getUpdateRequestStatus();
+				}
+			},
+			error: function () {
+				toastr.error('Failed to request a leaderboard update');
+			},
+		});
+	});
+});
+
+function getUpdateRequestStatus() {
+	$.ajax({
+		url: '/Leaderboard/GetUpdateRequestStatus',
+		method: 'GET',
+		data: {
+			requestID: requestID
+		},
+		success: function (data) {
+			if (data.processedTimeUTC != null) {
+				window.location.reload();
+			}
+			setTimeout(getUpdateRequestStatus, 1000);
+		},
+	});
+};
 </script>
 
 <div class="text-center fade-in" style="margin-left: 15px; margin-right: 15px;">
@@ -59,6 +101,7 @@ $('#pills-tab a').on('click', function (e) {
 			<h1 class="display-4 info-card rounded-corners-large fit-content box-shadow">
 				@Model.Leaderboard.LevelName 
 				<a target="_blank" href="https://steamcommunity.com/sharedfiles/filedetails/?id=@Model.Leaderboard.WorkshopFileID"><i class="fab fa-steam"></i></a>
+				<i title="Request Fresh Scan" class="fas fa-sync fa-xxs pointer" id="requestUpdate"></i>
 			</h1>
 		</div>
 		<div class="col-3">
